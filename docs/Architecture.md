@@ -101,3 +101,9 @@ Then `npm install` and `npx ng serve`.
 
 `NotificationsRealtime` (in `libs/feature/notifications`) opens a SignalR connection to `<api host>/hubs/notifications` while the bell is on screen,
 using the session token. Pushed notifications go to `NotificationsStore.receive()`; the 5-minute poll in the bell is only a safety net.
+
+## Brand
+
+The logo is a chat bubble holding the letter ت with a check-shaped tail (`<tamam-logo on="light|dark|brand" />` in `@tamam/shared`).
+The bubble is green on light and navy backgrounds and navy on a green background. Static files: `public/favicon.svg`, `favicon.ico`, `apple-touch-icon.png`, `icon-192.png`, `icon-512.png`, `logo-mark.svg`, `site.webmanifest`.
+`AppTitleStrategy` sets the tab title to `<page title> | تمام`.

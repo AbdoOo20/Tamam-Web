@@ -9,7 +9,7 @@ import { Logo } from '@tamam/shared';
   template: `
     <div class="auth">
       <aside class="brand-panel d-none d-lg-flex">
-        <a routerLink="/" class="text-decoration-none" aria-label="تمام"><tamam-logo [light]="true" /></a>
+        <a routerLink="/" class="text-decoration-none" aria-label="تمام"><tamam-logo on="dark" /></a>
         <div>
           <h2>اعرف الطلب الذي سيُرفض قبل أن تشحنه</h2>
           <ul>
