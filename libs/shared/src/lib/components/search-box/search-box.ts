@@ -29,7 +29,6 @@ export class SearchBox {
   readonly value = input('');
   readonly debounceMs = input(350);
   readonly searched = output<string>();
-
   private timer: ReturnType<typeof setTimeout> | undefined;
 
   constructor() {

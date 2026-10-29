@@ -27,10 +27,8 @@ export class RegisterPage {
   private readonly userService = inject(UserService);
   private readonly userStore = inject(UserStore);
   private readonly router = inject(Router);
-
   protected readonly countries = toSignal(inject(CountriesService).getAll(), { initialValue: [] });
   protected readonly serverError = signal<string | null>(null);
-
   private readonly model = signal({
     businessName: '',
     ownerName: '',
@@ -39,7 +37,6 @@ export class RegisterPage {
     email: '',
     password: '',
   });
-
   protected readonly registerForm = form(
     this.model,
     (path) => {

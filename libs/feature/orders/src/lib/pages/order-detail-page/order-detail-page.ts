@@ -53,10 +53,8 @@ export class OrderDetailPage {
   private readonly toast = inject(ToastService);
   private readonly confirmService = inject(ConfirmService);
   protected readonly store = inject(OrderDetailStore);
-
   /** Bound from the `:id` route parameter. */
   readonly id = input.required<string>();
-
   protected readonly changingStatus = signal(false);
   protected readonly payment = PAYMENT_METHOD_LABEL;
   protected readonly deliveryLabel = MESSAGE_DELIVERY_LABEL;

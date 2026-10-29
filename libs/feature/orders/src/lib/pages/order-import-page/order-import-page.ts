@@ -32,7 +32,6 @@ interface PreviewOrder {
 export class OrderImportPage {
   private readonly service = inject(OrdersService);
   private readonly toast = inject(ToastService);
-
   protected readonly fileName = signal('');
   protected readonly orders = signal<PreviewOrder[]>([]);
   protected readonly problems = signal<string[]>([]);
@@ -44,7 +43,6 @@ export class OrderImportPage {
     { value: ImportKind.Regular, label: 'طلبات جديدة', hint: 'تُقيَّم مخاطرها ويُجهَّز لها رابط تأكيد' },
     { value: ImportKind.Historical, label: 'طلبات سابقة', hint: 'لتغذية سجل العملاء فقط، بدون تأكيد' },
   ];
-
   protected readonly tooMany = computed(() => this.orders().length > MAX_ROWS);
   protected readonly canImport = computed(
     () => this.orders().length > 0 && !this.tooMany() && !this.importing() && this.result() === null,

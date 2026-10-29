@@ -19,7 +19,6 @@ export interface ConfirmRequest extends Required<ConfirmOptions> {
 @Service()
 export class ConfirmService {
   private readonly current = signal<ConfirmRequest | null>(null);
-
   readonly request = this.current.asReadonly();
 
   confirm(options: ConfirmOptions): Promise<boolean> {

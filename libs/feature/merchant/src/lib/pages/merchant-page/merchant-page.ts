@@ -53,7 +53,6 @@ type TabKey = 'profile' | 'staff' | 'consent' | 'api' | 'templates' | 'audit';
 })
 export class MerchantPage {
   protected readonly active = signal<TabKey>('profile');
-
   protected readonly tabs: { key: TabKey; label: string; icon: string }[] = [
     { key: 'profile', label: 'بيانات المتجر', icon: 'bi-shop' },
     { key: 'staff', label: 'الموظفون', icon: 'bi-people' },

@@ -96,3 +96,8 @@ Built on Bootstrap 5.3 RTL (CSS only, no Bootstrap JS) and bootstrap-icons; bran
 
 Backend `https://localhost:7265` needs `Cors:AllowedOrigins` containing `http://localhost:4200` (see `appsettings.Example.json`).
 Then `npm install` and `npx ng serve`.
+
+## Real-time notifications
+
+`NotificationsRealtime` (in `libs/feature/notifications`) opens a SignalR connection to `<api host>/hubs/notifications` while the bell is on screen,
+using the session token. Pushed notifications go to `NotificationsStore.receive()`; the 5-minute poll in the bell is only a safety net.

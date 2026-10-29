@@ -45,7 +45,6 @@ const ATTRIBUTION: Record<string, { label: string; tone: Tone }> = {
 export class DashboardPage implements OnInit {
   protected readonly store = inject(DashboardStore);
   protected readonly ranges = RANGES;
-
   protected readonly statusItems = computed<MeterItem[]>(() =>
     (this.store.data()?.byStatus ?? []).map((row) => ({ label: row.key, value: row.count })),
   );

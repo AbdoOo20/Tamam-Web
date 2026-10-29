@@ -16,14 +16,11 @@ export class StaffTab implements OnInit {
   private readonly service = inject(MerchantService);
   private readonly toast = inject(ToastService);
   private readonly confirmService = inject(ConfirmService);
-
   protected readonly loading = signal(true);
   protected readonly staff = signal<Staff[]>([]);
   protected readonly adding = signal(false);
   protected readonly serverError = signal<string | null>(null);
-
   private readonly model = signal({ fullName: '', email: '', phoneNumber: '', password: '' });
-
   protected readonly staffForm = form(
     this.model,
     (path) => {

@@ -29,19 +29,15 @@ export class OrderOutcomeCard {
   private readonly service = inject(OrdersService);
   private readonly store = inject(OrderDetailStore);
   private readonly toast = inject(ToastService);
-
   readonly order = input.required<OrderDetail>();
-
   protected readonly reasons = Object.entries(REJECTION_REASON_LABEL).map(([value, label]) => ({ value, label }));
   protected readonly reasonLabel = REJECTION_REASON_LABEL;
   protected readonly resultLabel = FINAL_RESULT_LABEL;
-
   protected readonly reports = signal<RejectionReport[]>([]);
   protected readonly outcome = signal<OrderOutcome | null>(null);
   protected readonly reporting = signal(false);
   protected readonly editingLoss = signal(false);
   protected readonly serverError = signal<string | null>(null);
-
   /** The merchant can report a reason only after the order was refused or returned. */
   protected readonly canReport = computed(
     () => ([OrderStatus.Refused, OrderStatus.Returned] as number[]).includes(this.order().statusId),
@@ -53,10 +49,8 @@ export class OrderOutcomeCard {
       this.reports().length > 0 ||
       this.outcome() !== null,
   );
-
   private readonly reasonModel = signal({ reasonId: '1', details: '', evidenceUrl: '' });
   private readonly lossModel = signal({ outboundShippingCost: 0, returnShippingCost: 0, otherLoss: 0 });
-
   protected readonly reasonForm = form(
     this.reasonModel,
     (path) => {
@@ -90,7 +84,6 @@ export class OrderOutcomeCard {
       },
     },
   );
-
   protected readonly lossForm = form(
     this.lossModel,
     (path) => {

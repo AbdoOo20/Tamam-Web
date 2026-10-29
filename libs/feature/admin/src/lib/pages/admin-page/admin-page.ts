@@ -53,7 +53,6 @@ type TabKey = 'overview' | 'merchants' | 'plans' | 'rules' | 'requests' | 'audit
 })
 export class AdminPage {
   protected readonly active = signal<TabKey>('overview');
-
   protected readonly tabs: { key: TabKey; label: string; icon: string }[] = [
     { key: 'overview', label: 'نظرة عامة', icon: 'bi-speedometer2' },
     { key: 'merchants', label: 'التجار', icon: 'bi-shop' },

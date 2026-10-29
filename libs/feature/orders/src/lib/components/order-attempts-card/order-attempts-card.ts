@@ -25,20 +25,15 @@ export class OrderAttemptsCard {
   private readonly service = inject(OrdersService);
   private readonly store = inject(OrderDetailStore);
   private readonly toast = inject(ToastService);
-
   readonly order = input.required<OrderDetail>();
-
   protected readonly label = DELIVERY_ATTEMPT_LABEL;
   protected readonly results = Object.entries(DELIVERY_ATTEMPT_LABEL).map(([value, text]) => ({ value, text }));
   protected readonly adding = signal(false);
   protected readonly serverError = signal<string | null>(null);
-
   protected readonly canAdd = computed(() =>
     ([OrderStatus.Shipped, OrderStatus.OutForDelivery, OrderStatus.FailedDelivery] as number[]).includes(this.order().statusId),
   );
-
   private readonly model = signal({ result: String(DeliveryAttemptResult.Delivered), carrierNote: '', proofImageUrl: '' });
-
   protected readonly attemptForm = form(
     this.model,
     (path) => {

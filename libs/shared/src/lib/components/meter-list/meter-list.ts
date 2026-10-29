@@ -37,7 +37,6 @@ export interface MeterItem {
 })
 export class MeterList {
   readonly items = input.required<readonly MeterItem[]>();
-
   protected readonly rows = computed(() => {
     const items = this.items();
     const total = items.reduce((sum, item) => sum + item.value, 0);

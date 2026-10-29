@@ -15,13 +15,11 @@ export class ApiKeyTab implements OnInit {
   private readonly toast = inject(ToastService);
   private readonly confirmService = inject(ConfirmService);
   private readonly environment = inject(APP_ENVIRONMENT);
-
   protected readonly loading = signal(true);
   protected readonly busy = signal(false);
   protected readonly hasKey = signal(false);
   /** The new key. It is shown only once, right after it is generated. */
   protected readonly newKey = signal<string | null>(null);
-
   protected readonly example = computed(
     () => `curl -X POST "${this.environment.apiUrl}/integrations/orders" \\
   -H "X-Api-Key: ${this.newKey() ?? 'YOUR_API_KEY'}" \\

@@ -49,16 +49,12 @@ import { CarriersService } from '../../services/carriers.service';
 export class CarrierForm implements OnInit {
   private readonly service = inject(CarriersService);
   private readonly toast = inject(ToastService);
-
   /** The carrier being edited; leave empty to add a new one. */
   readonly carrier = input<Carrier | null>(null);
   readonly saved = output<void>();
   readonly closed = output<void>();
-
   protected readonly serverError = signal<string | null>(null);
-
   private readonly model = signal({ name: '', phone: '', trackingUrlTemplate: '', isActive: true });
-
   protected readonly carrierForm = form(
     this.model,
     (path) => {

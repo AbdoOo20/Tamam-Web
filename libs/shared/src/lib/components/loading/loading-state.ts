@@ -47,6 +47,5 @@ export class LoadingState {
   readonly variant = input<'spinner' | 'skeleton' | 'inline'>('spinner');
   readonly label = input('جارٍ التحميل...');
   readonly rows = input(5, { transform: numberAttribute });
-
   protected readonly rowList = computed(() => Array.from({ length: this.rows() }, (_, i) => i));
 }

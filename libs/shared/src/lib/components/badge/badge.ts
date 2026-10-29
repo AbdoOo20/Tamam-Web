@@ -19,7 +19,6 @@ import { Tone } from '../../models/labels';
 export class Badge {
   readonly tone = input<Tone>('secondary');
   readonly icon = input<string>();
-
   protected readonly toneClass = computed(
     () => `bg-${this.tone()}-subtle text-${this.tone()}-emphasis border-${this.tone()}-subtle`,
   );

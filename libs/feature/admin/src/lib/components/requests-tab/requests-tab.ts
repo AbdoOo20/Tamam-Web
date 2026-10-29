@@ -29,7 +29,6 @@ export class RequestsTab implements OnInit {
   private readonly service = inject(AdminService);
   private readonly toast = inject(ToastService);
   private readonly confirmService = inject(ConfirmService);
-
   protected readonly typeLabel = DATA_REQUEST_TYPE_LABEL;
   protected readonly Status = DataRequestStatus;
   protected readonly Type = DataRequestType;

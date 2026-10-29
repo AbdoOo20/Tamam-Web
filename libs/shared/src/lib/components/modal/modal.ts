@@ -82,7 +82,6 @@ export class Modal {
   readonly title = input.required<string>();
   readonly size = input<'md' | 'lg'>('md');
   readonly closed = output<void>();
-
   protected readonly titleId = `tamam-modal-title-${nextId++}`;
   private readonly dialog = viewChild.required<ElementRef<HTMLDialogElement>>('dialog');
 

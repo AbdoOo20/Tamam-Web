@@ -25,15 +25,11 @@ export class OrderItemsCard {
   private readonly service = inject(OrdersService);
   private readonly store = inject(OrderDetailStore);
   private readonly toast = inject(ToastService);
-
   readonly order = input.required<OrderDetail>();
-
   protected readonly editing = signal(false);
   protected readonly serverError = signal<string | null>(null);
   protected readonly canEdit = computed(() => (EDITABLE_ORDER_STATUSES as readonly number[]).includes(this.order().statusId));
-
   protected readonly model = signal<{ items: ItemModel[] }>({ items: [] });
-
   protected readonly itemsForm = form(
     this.model,
     (path) => {

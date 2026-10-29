@@ -1,14 +1,16 @@
-import { Component, DestroyRef, ElementRef, inject, OnInit, signal } from '@angular/core';
+import { Component, DestroyRef, effect, ElementRef, inject, OnInit, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { EmptyState, LoadingState, TamamDatePipe, TooltipDirective } from '@tamam/shared';
 import { firstValueFrom } from 'rxjs';
 
 import { notificationIcon } from '../../models/notification-meta';
 import { Notification } from '../../models/notification.model';
+import { NotificationsRealtime } from '../../services/notifications-realtime.service';
 import { NotificationsService } from '../../services/notifications.service';
 import { NotificationsStore } from '../../store/notifications.store';
 
-const POLL_MS = 60_000;
+/** Safety net only: the real-time connection delivers new notifications instantly. */
+const FALLBACK_POLL_MS = 300_000;
 
 /** Bell with an unread badge and a dropdown with the latest notifications. */
 @Component({
@@ -23,22 +25,37 @@ const POLL_MS = 60_000;
 })
 export class NotificationsBell implements OnInit {
   private readonly service = inject(NotificationsService);
+  private readonly realtime = inject(NotificationsRealtime);
   private readonly element = inject<ElementRef<HTMLElement>>(ElementRef);
   protected readonly store = inject(NotificationsStore);
-
   protected readonly open = signal(false);
   protected readonly loading = signal(false);
   protected readonly latest = signal<Notification[]>([]);
   protected readonly icon = notificationIcon;
 
-  constructor() {
-    const timer = setInterval(() => void this.store.refreshUnread(), POLL_MS);
-
-    inject(DestroyRef).onDestroy(() => clearInterval(timer));
-  }
-
   ngOnInit(): void {
     void this.store.refreshUnread();
+    void this.realtime.start(
+      (notification) => this.store.receive(notification),
+      () => void this.store.refreshUnread(),
+    );
+  }
+
+  constructor() {
+    const timer = setInterval(() => void this.store.refreshUnread(), FALLBACK_POLL_MS);
+
+    inject(DestroyRef).onDestroy(() => {
+      clearInterval(timer);
+      void this.realtime.stop();
+    });
+
+    effect(() => {
+      const received = this.store.lastReceived();
+
+      if (received && this.open()) {
+        this.latest.update((items) => [received, ...items.filter((item) => item.id !== received.id)].slice(0, 6));
+      }
+    });
   }
 
   protected async toggle(): Promise<void> {

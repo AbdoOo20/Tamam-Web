@@ -39,7 +39,6 @@ export class Pagination {
   readonly totalPages = input.required<number>();
   readonly totalCount = input(0);
   readonly pageChange = output<number>();
-
   /** Page numbers around the current one; `null` is an ellipsis. */
   protected readonly pages = computed(() => {
     const total = this.totalPages();

@@ -26,7 +26,6 @@ const ACTION_LABEL: Record<string, string> = { Create: 'إنشاء', Update: 'ت
 })
 export class AuditTab implements OnInit {
   private readonly service = inject(MerchantService);
-
   protected readonly entities = Object.entries(ENTITY_LABEL);
   protected readonly actions = Object.entries(ACTION_LABEL);
   protected readonly items = signal<AuditLog[]>([]);

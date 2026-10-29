@@ -54,13 +54,10 @@ import { ProductsService } from '../../services/products.service';
 export class ProductForm implements OnInit {
   private readonly service = inject(ProductsService);
   private readonly toast = inject(ToastService);
-
   readonly product = input<Product | null>(null);
   readonly saved = output<void>();
   readonly closed = output<void>();
-
   protected readonly serverError = signal<string | null>(null);
-
   private readonly model = signal<{
     name: string;
     sku: string;
@@ -68,7 +65,6 @@ export class ProductForm implements OnInit {
     adUrl: string;
     isActive: boolean;
   }>({ name: '', sku: '', defaultPrice: null, adUrl: '', isActive: true });
-
   protected readonly productForm = form(
     this.model,
     (path) => {

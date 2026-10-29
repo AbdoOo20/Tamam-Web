@@ -38,7 +38,6 @@ const TERMS_VERSION = '1.0';
 export class ConsentTab implements OnInit {
   private readonly service = inject(MerchantService);
   private readonly toast = inject(ToastService);
-
   protected readonly loading = signal(true);
   protected readonly saving = signal(false);
   protected readonly consent = signal<Consent | null>(null);

@@ -17,9 +17,7 @@ export class MainLayout {
   private readonly userService = inject(UserService);
   private readonly router = inject(Router);
   protected readonly userStore = inject(UserStore);
-
   protected readonly menuOpen = signal(false);
-
   protected readonly groups = computed(() => {
     const role = this.userStore.role();
 
@@ -30,7 +28,6 @@ export class MainLayout {
       ),
     })).filter((group) => group.items.length > 0);
   });
-
   protected readonly roleLabel = computed(() => {
     switch (this.userStore.role()) {
       case RoleNames.Owner:
@@ -43,9 +40,7 @@ export class MainLayout {
         return '';
     }
   });
-
   protected readonly showBell = computed(() => !this.userStore.isPlatformAdmin());
-
   protected readonly initial = computed(() => this.userStore.fullName()?.trim().charAt(0) || '؟');
 
   constructor() {

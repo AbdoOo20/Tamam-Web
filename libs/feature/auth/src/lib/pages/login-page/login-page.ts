@@ -16,13 +16,10 @@ export class LoginPage {
   private readonly userService = inject(UserService);
   private readonly userStore = inject(UserStore);
   private readonly router = inject(Router);
-
   /** Bound from the `?returnUrl=` query parameter. */
   readonly returnUrl = input<string>();
-
   protected readonly serverError = signal<string | null>(null);
   private readonly model = signal({ email: '', password: '' });
-
   protected readonly loginForm = form(
     this.model,
     (path) => {

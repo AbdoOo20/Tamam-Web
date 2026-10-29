@@ -13,6 +13,7 @@ interface NotificationsState {
   totalCount: number;
   unreadOnly: boolean;
   unreadCount: number;
+  lastReceived: Notification | null;
   loading: boolean;
   error: string | null;
 }
@@ -29,6 +30,7 @@ export const NotificationsStore = signalStore(
     totalCount: 0,
     unreadOnly: false,
     unreadCount: 0,
+    lastReceived: null,
     loading: false,
     error: null,
   }),
@@ -39,6 +41,19 @@ export const NotificationsStore = signalStore(
       } catch {
         // The bell is decorative; a failed poll must not interrupt the user.
       }
+    },
+
+    /** A notification pushed by the server: bump the badge and show it at the top of page 1. */
+    receive(notification: Notification): void {
+      const onFirstPage = store.page() === 1 && (!store.unreadOnly() || !notification.isRead);
+
+      patchState(store, {
+        unreadCount: store.unreadCount() + (notification.isRead ? 0 : 1),
+        lastReceived: notification,
+        items: onFirstPage ? [notification, ...store.items()].slice(0, PAGE_SIZE) : store.items(),
+        totalCount: store.totalCount() + 1,
+      });
+      toast.info(notification.title);
     },
 
     async load(): Promise<void> {

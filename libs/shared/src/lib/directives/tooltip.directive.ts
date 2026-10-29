@@ -33,7 +33,6 @@ export class TooltipDirective {
   readonly tooltipLines = input(1, { transform: numberAttribute });
   /** Show the tooltip even if the text is not cut (for custom `tamamTooltip` text). */
   readonly tooltipAlways = input(false, { transform: booleanAttribute });
-
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
   private readonly document = inject(DOCUMENT);
   private tip: HTMLElement | null = null;

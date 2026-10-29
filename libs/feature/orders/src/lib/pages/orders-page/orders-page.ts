@@ -40,14 +40,12 @@ import { OrdersStore } from '../../store/orders.store';
 })
 export class OrdersPage implements OnInit {
   protected readonly store = inject(OrdersStore);
-
   protected readonly carriers = toSignal(
     inject(OrderLookupsService)
       .carriers()
       .pipe(catchError(() => of([]))),
     { initialValue: [] },
   );
-
   protected readonly statusOptions = Object.entries(ORDER_STATUS_META).map(([id, meta]) => ({ id: +id, label: meta.label }));
   protected readonly riskOptions = Object.entries(RISK_LEVEL_META).map(([id, meta]) => ({ id: +id, label: meta.label }));
   protected readonly showFilters = signal(false);

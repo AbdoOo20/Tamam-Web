@@ -33,7 +33,6 @@ import { MerchantService } from '../../services/merchant.service';
 })
 export class TemplatesTab implements OnInit {
   private readonly service = inject(MerchantService);
-
   protected readonly loading = signal(true);
   protected readonly templates = signal<MessageTemplate[]>([]);
 

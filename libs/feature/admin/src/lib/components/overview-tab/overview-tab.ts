@@ -39,7 +39,6 @@ import { AdminService } from '../../services/admin.service';
 export class OverviewTab implements OnInit {
   private readonly service = inject(AdminService);
   private readonly toast = inject(ToastService);
-
   protected readonly overview = signal<AdminOverview | null>(null);
   protected readonly loading = signal(true);
   protected readonly error = signal<string | null>(null);

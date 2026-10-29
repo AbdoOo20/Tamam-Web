@@ -23,7 +23,6 @@ export class BillingPage implements OnInit {
   protected readonly store = inject(BillingStore);
   private readonly confirmService = inject(ConfirmService);
   protected readonly usageLabel = USAGE_TYPE_LABEL;
-
   /** Share of the included orders already used, 0-100. */
   protected readonly usedPercent = computed(() => {
     const subscription = this.store.subscription();

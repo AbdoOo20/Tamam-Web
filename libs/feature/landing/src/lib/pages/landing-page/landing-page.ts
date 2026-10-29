@@ -77,21 +77,18 @@ export class LandingPage {
   protected readonly selected = signal<DemoCase['key']>('high');
   protected readonly current = computed(() => DEMO_CASES.find((c) => c.key === this.selected()) ?? DEMO_CASES[0]);
   protected readonly menuOpen = signal(false);
-
   protected readonly plans = toSignal(
     inject(PublicPlansService)
       .getPlans()
       .pipe(catchError(() => of([]))),
     { initialValue: null },
   );
-
   protected readonly steps = [
     { title: 'سجّل الطلب', text: 'أضفه يدويًا أو ارفع ملف CSV، أو اربط متجرك بمفتاح API.' },
     { title: 'شوف التقييم وأسبابه', text: 'درجة من 100 مع شرح بالعربي لكل إشارة، وتوصية واضحة بما تفعله.' },
     { title: 'أكّد مع العميل', text: 'رابط تأكيد ورسالة واتساب جاهزة. العميل يؤكد أو يؤجل أو يلغي بنفسه.' },
     { title: 'اعرف من المسؤول', text: 'لو رُفض الطلب، يتحدد السبب والمسؤول وقيمة الخسارة.' },
   ];
-
   protected readonly features = [
     { icon: 'bi-shield-check', title: 'تقييم مخاطر بقواعد واضحة', text: 'لا صندوق أسود. كل نقطة في الدرجة لها سبب تقرؤه وتقتنع به.' },
     { icon: 'bi-whatsapp', title: 'تأكيد عبر واتساب', text: 'رسالة جاهزة بالعربي وفتح مباشر للمحادثة، بدون تكلفة رسائل في البداية.' },
@@ -100,14 +97,12 @@ export class LandingPage {
     { icon: 'bi-plug', title: 'ربط بمتجرك', text: 'مفتاح API لإرسال الطلبات تلقائيًا من موقعك دون تكرار الطلب الواحد.' },
     { icon: 'bi-person-lock', title: 'خصوصية العميل أولًا', text: 'العميل يوقف الرسائل أو يطلب حذف بياناته بنفسه من الرابط.' },
   ];
-
   protected readonly parties = [
     { name: 'العميل', icon: 'bi-person', text: 'غيّر رأيه، لا يرد، أو لا يملك المال وقت التسليم.' },
     { name: 'التاجر', icon: 'bi-shop', text: 'منتج مختلف عن الإعلان، سعر غير متفق عليه، أو تأخر في الشحن.' },
     { name: 'شركة الشحن', icon: 'bi-truck', text: 'سلوك المندوب، أو عنوان لم يُبحث عنه فعلًا.' },
     { name: 'محايد', icon: 'bi-dash-circle', text: 'ظرف لا يمكن نسبته لأحد، ولا يُحسب على أي طرف.' },
   ];
-
   protected readonly faqs = [
     { q: 'هل أحتاج واتساب بزنس API؟', a: 'لا. نبدأ برابط واتساب يفتح المحادثة برسالة جاهزة تضغط إرسال بنفسك. ربط Cloud API يضاف لاحقًا لمن يحتاجه.' },
     { q: 'هل التقييم يمنع الطلب تلقائيًا؟', a: 'لا. التقييم توصية فقط، والقرار لك دائمًا. ويمكنك تشغيل الوضع التجريبي لترى التقييم دون أي تأثير على عملك.' },

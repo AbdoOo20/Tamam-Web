@@ -28,7 +28,6 @@ export class MerchantsTab implements OnInit {
   private readonly service = inject(AdminService);
   private readonly toast = inject(ToastService);
   private readonly confirmService = inject(ConfirmService);
-
   protected readonly statusOptions = Object.entries(MERCHANT_STATUS_META).map(([id, meta]) => ({ id: +id, label: meta.label }));
   protected readonly items = signal<AdminMerchantListItem[]>([]);
   protected readonly plans = signal<AdminPlan[]>([]);

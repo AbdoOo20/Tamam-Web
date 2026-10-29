@@ -40,11 +40,9 @@ export class BarChart {
   readonly data = input.required<readonly DailyCount[]>();
   readonly from = input.required<string>();
   readonly to = input.required<string>();
-
   protected readonly width = WIDTH;
   protected readonly height = HEIGHT;
   protected readonly pad = PAD;
-
   private readonly series = computed(() => {
     const counts = new Map(this.data().map((d) => [d.date.slice(0, 10), d.count]));
     const days: { date: string; label: string; count: number }[] = [];
@@ -63,13 +61,11 @@ export class BarChart {
 
     return days;
   });
-
   private readonly maxValue = computed(() => {
     const max = Math.max(1, ...this.series().map((d) => d.count));
 
     return max <= 4 ? 4 : Math.ceil(max / 4) * 4;
   });
-
   protected readonly bars = computed(() => {
     const series = this.series();
     const slot = (WIDTH - PAD.left - PAD.right) / Math.max(1, series.length);
@@ -87,7 +83,6 @@ export class BarChart {
       };
     });
   });
-
   protected readonly ticks = computed(() => {
     const plotHeight = HEIGHT - PAD.top - PAD.bottom;
 
@@ -96,7 +91,6 @@ export class BarChart {
       y: HEIGHT - PAD.bottom - (plotHeight / 4) * step,
     }));
   });
-
   protected readonly labels = computed(() => {
     const bars = this.bars();
     const every = Math.max(1, Math.ceil(bars.length / 7));
@@ -105,7 +99,6 @@ export class BarChart {
       .filter((_, index) => index % every === 0)
       .map((bar) => ({ x: bar.x + bar.width / 2, text: bar.label }));
   });
-
   protected readonly summary = computed(() => {
     const total = this.series().reduce((sum, day) => sum + day.count, 0);
 

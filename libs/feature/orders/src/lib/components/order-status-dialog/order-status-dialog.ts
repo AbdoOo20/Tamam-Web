@@ -65,15 +65,12 @@ export class OrderStatusDialog {
   private readonly service = inject(OrdersService);
   private readonly store = inject(OrderDetailStore);
   private readonly toast = inject(ToastService);
-
   readonly order = input.required<OrderDetail>();
   readonly closed = output<void>();
-
   protected readonly selected = signal<OrderStatus | null>(null);
   protected readonly note = signal('');
   protected readonly busy = signal(false);
   protected readonly error = signal<string | null>(null);
-
   protected readonly options = computed(() =>
     (ORDER_TRANSITIONS[this.order().statusId] ?? []).map((id) => ({ id, ...ORDER_STATUS_META[id] })),
   );

@@ -45,7 +45,6 @@ import { AdminService } from '../../services/admin.service';
 })
 export class AdminAuditTab implements OnInit {
   private readonly service = inject(AdminService);
-
   protected readonly items = signal<AdminAuditLog[]>([]);
   protected readonly page = signal(1);
   protected readonly totalPages = signal(0);

@@ -18,10 +18,8 @@ type Done = 'confirmed' | 'rescheduled' | 'cancelled' | 'optedOut' | 'dataReques
 })
 export class ConfirmationPage {
   private readonly service = inject(PublicLinksService);
-
   /** Bound from the `:token` route parameter. */
   readonly token = input.required<string>();
-
   protected readonly order = signal<PublicOrder | null>(null);
   protected readonly loading = signal(true);
   protected readonly loadError = signal<{ title: string; text: string } | null>(null);
@@ -32,9 +30,7 @@ export class ConfirmationPage {
     Object.entries(REJECTION_REASON_LABEL).map(([id, label]) => ({ id: +id, label })),
   );
   protected readonly isSurvey = computed(() => this.order()?.purpose === PublicLinkPurpose.RejectionSurvey);
-
   private readonly model = signal({ date: '', note: '', reasonId: '1', details: '' });
-
   protected readonly responseForm = form(
     this.model,
     (path) => {

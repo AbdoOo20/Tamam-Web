@@ -24,9 +24,7 @@ export class OrderRiskPanel {
   private readonly service = inject(OrdersService);
   private readonly store = inject(OrderDetailStore);
   private readonly toast = inject(ToastService);
-
   readonly order = input.required<OrderDetail>();
-
   protected readonly busy = signal(false);
   protected readonly risk = computed(() => this.order().risk);
   protected readonly levelClass = computed(() => `level-${metaOf(RISK_LEVEL_META, this.risk()?.level).tone}`);
@@ -36,7 +34,6 @@ export class OrderRiskPanel {
 
     return decision ? MERCHANT_DECISION_LABEL[decision] : null;
   });
-
   protected readonly decisions = [
     { value: MerchantDecision.FollowedRecommendation, label: 'سأتبع التوصية', icon: 'bi-check2-circle' },
     { value: MerchantDecision.Ignored, label: 'سأتجاهلها', icon: 'bi-skip-forward' },

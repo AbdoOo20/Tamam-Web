@@ -13,7 +13,6 @@ import { ToastService } from '@tamam/core';
 })
 export class CopyButton {
   private readonly toast = inject(ToastService);
-
   readonly value = input.required<string>();
   readonly label = input('نسخ');
   protected readonly copied = signal(false);

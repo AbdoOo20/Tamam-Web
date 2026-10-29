@@ -12,7 +12,6 @@ export interface Toast {
 export class ToastService {
   private readonly items = signal<readonly Toast[]>([]);
   private nextId = 1;
-
   readonly toasts = this.items.asReadonly();
 
   success(message: string): void {

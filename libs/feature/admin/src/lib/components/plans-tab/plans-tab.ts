@@ -15,13 +15,11 @@ import { AdminService } from '../../services/admin.service';
 export class PlansTab implements OnInit {
   private readonly service = inject(AdminService);
   private readonly toast = inject(ToastService);
-
   protected readonly plans = signal<AdminPlan[]>([]);
   protected readonly loading = signal(true);
   /** `undefined` = closed, `null` = new plan, a plan = editing it. */
   protected readonly editing = signal<AdminPlan | null | undefined>(undefined);
   protected readonly serverError = signal<string | null>(null);
-
   private readonly model = signal({
     code: '',
     nameAr: '',
@@ -31,7 +29,6 @@ export class PlansTab implements OnInit {
     currencyCode: 'USD',
     isActive: true,
   });
-
   protected readonly planForm = form(
     this.model,
     (path) => {

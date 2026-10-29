@@ -65,10 +65,8 @@ import { MerchantService } from '../../services/merchant.service';
 export class ProfileTab implements OnInit {
   private readonly service = inject(MerchantService);
   private readonly toast = inject(ToastService);
-
   protected readonly loading = signal(true);
   protected readonly serverError = signal<string | null>(null);
-
   private readonly model = signal({
     businessName: '',
     ownerName: '',
@@ -79,7 +77,6 @@ export class ProfileTab implements OnInit {
     shadowMode: false,
     defaultLanguage: 'ar-EG',
   });
-
   protected readonly profileForm = form(
     this.model,
     (path) => {

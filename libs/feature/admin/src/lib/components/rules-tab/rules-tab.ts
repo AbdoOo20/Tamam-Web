@@ -15,14 +15,11 @@ import { AdminService } from '../../services/admin.service';
 export class RulesTab implements OnInit {
   private readonly service = inject(AdminService);
   private readonly toast = inject(ToastService);
-
   protected readonly rules = signal<AdminRiskRule[]>([]);
   protected readonly loading = signal(true);
   protected readonly editing = signal<AdminRiskRule | null>(null);
   protected readonly serverError = signal<string | null>(null);
-
   private readonly model = signal({ nameAr: '', explanationTemplateAr: '', points: 0, isActive: true });
-
   protected readonly ruleForm = form(
     this.model,
     (path) => {

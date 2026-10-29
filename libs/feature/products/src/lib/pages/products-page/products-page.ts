@@ -24,7 +24,6 @@ import { ProductsStore } from '../../store/products.store';
 export class ProductsPage implements OnInit {
   protected readonly store = inject(ProductsStore);
   private readonly confirmService = inject(ConfirmService);
-
   /** `undefined` = form closed, `null` = adding, a product = editing it. */
   protected readonly editing = signal<Product | null | undefined>(undefined);
 

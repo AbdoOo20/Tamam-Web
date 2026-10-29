@@ -35,9 +35,7 @@ export class OrderConfirmationPanel {
   private readonly store = inject(OrderDetailStore);
   private readonly toast = inject(ToastService);
   private readonly confirmService = inject(ConfirmService);
-
   readonly order = input.required<OrderDetail>();
-
   protected readonly busy = signal(false);
   protected readonly confirmation = computed(() => this.order().confirmation);
   /** The merchant can still send the message when the customer has not answered. */

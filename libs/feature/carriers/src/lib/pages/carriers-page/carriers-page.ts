@@ -21,7 +21,6 @@ import { CarriersStore } from '../../store/carriers.store';
 export class CarriersPage implements OnInit {
   protected readonly store = inject(CarriersStore);
   private readonly confirmService = inject(ConfirmService);
-
   /** `undefined` = form closed, `null` = adding, a carrier = editing it. */
   protected readonly editing = signal<Carrier | null | undefined>(undefined);
 

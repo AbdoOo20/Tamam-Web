@@ -68,10 +68,8 @@ export class OrderFormPage implements OnInit {
   private readonly lookups = inject(OrderLookupsService);
   private readonly router = inject(Router);
   private readonly toast = inject(ToastService);
-
   /** Bound from the `:id` route parameter; empty when creating. */
   readonly id = input<string>();
-
   protected readonly paymentMethods = Object.entries(PAYMENT_METHOD_LABEL).map(([value, label]) => ({ value, label }));
   protected readonly isEdit = computed(() => !!this.id());
   protected readonly loading = signal(false);
@@ -81,7 +79,6 @@ export class OrderFormPage implements OnInit {
   protected readonly currency = signal('EGP');
   private latitude: number | null = null;
   private longitude: number | null = null;
-
   protected readonly carriers = toSignal(
     this.lookups.carriers().pipe(catchError(() => of([]))),
     { initialValue: [] },
@@ -90,7 +87,6 @@ export class OrderFormPage implements OnInit {
     this.lookups.products().pipe(catchError(() => of({ items: [] }))),
     { initialValue: { items: [] } },
   );
-
   protected readonly model = signal<OrderFormModel>({
     orderNo: '',
     recipientName: '',
@@ -110,7 +106,6 @@ export class OrderFormPage implements OnInit {
     notes: '',
     items: [emptyItem()],
   });
-
   protected readonly orderForm = form(
     this.model,
     (path) => {
@@ -155,7 +150,6 @@ export class OrderFormPage implements OnInit {
       },
     },
   );
-
   protected readonly itemsTotal = computed(() =>
     this.model().items.reduce((sum, item) => sum + (item.quantity || 0) * (item.unitPrice || 0), 0),
   );

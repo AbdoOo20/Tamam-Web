@@ -15,10 +15,8 @@ import { PublicLinksService } from '../../services/public-links.service';
 })
 export class SurveyPage {
   private readonly service = inject(PublicLinksService);
-
   /** Bound from the `:token` route parameter. */
   readonly token = input.required<string>();
-
   protected readonly order = signal<PublicOrder | null>(null);
   protected readonly loading = signal(true);
   protected readonly loadError = signal<{ title: string; text: string } | null>(null);
@@ -27,9 +25,7 @@ export class SurveyPage {
   protected readonly reasons = signal<{ id: number; label: string }[]>(
     Object.entries(REJECTION_REASON_LABEL).map(([id, label]) => ({ id: +id, label })),
   );
-
   private readonly model = signal({ reasonId: '1', details: '' });
-
   protected readonly surveyForm = form(
     this.model,
     (path) => {

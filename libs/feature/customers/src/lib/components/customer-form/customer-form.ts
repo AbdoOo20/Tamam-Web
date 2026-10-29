@@ -50,14 +50,11 @@ import { CustomersService } from '../../services/customers.service';
 export class CustomerForm implements OnInit {
   private readonly service = inject(CustomersService);
   private readonly toast = inject(ToastService);
-
   readonly customer = input.required<Customer>();
   readonly saved = output<void>();
   readonly closed = output<void>();
-
   protected readonly serverError = signal<string | null>(null);
   private readonly model = signal({ fullName: '', altPhone: '', hasWhatsApp: '', notes: '' });
-
   protected readonly customerForm = form(
     this.model,
     (path) => {
