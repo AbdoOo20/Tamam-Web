@@ -1,5 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import {
   email,
   form,
@@ -15,7 +14,7 @@ import { Field } from '@tamam/shared';
 import { firstValueFrom } from 'rxjs';
 
 import { AuthShell } from '../../components/auth-shell/auth-shell';
-
+import { Country } from '../../models/country.model';
 import { CountriesService } from '../../services/countries.service';
 
 @Component({
@@ -23,11 +22,13 @@ import { CountriesService } from '../../services/countries.service';
   imports: [FormRoot, FormField, RouterLink, Field, AuthShell],
   templateUrl: './register-page.html',
 })
-export class RegisterPage {
+export class RegisterPage implements OnInit {
   private readonly userService = inject(UserService);
   private readonly userStore = inject(UserStore);
   private readonly router = inject(Router);
-  protected readonly countries = toSignal(inject(CountriesService).getAll(), { initialValue: [] });
+  private readonly countriesService = inject(CountriesService);
+  protected readonly countries = signal<Country[]>([]);
+  protected readonly countriesState = signal<'loading' | 'ready' | 'error'>('loading');
   protected readonly serverError = signal<string | null>(null);
   private readonly model = signal({
     businessName: '',
@@ -67,4 +68,19 @@ export class RegisterPage {
       },
     },
   );
+
+  ngOnInit(): void {
+    void this.loadCountries();
+  }
+
+  protected async loadCountries(): Promise<void> {
+    this.countriesState.set('loading');
+
+    try {
+      this.countries.set(await firstValueFrom(this.countriesService.getAll()));
+      this.countriesState.set('ready');
+    } catch {
+      this.countriesState.set('error');
+    }
+  }
 }
