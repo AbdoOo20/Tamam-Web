@@ -12,7 +12,22 @@
     "experimentalDecorators": true,
     "importHelpers": true,
     "target": "ES2022",
-    "module": "preserve"
+    "module": "preserve",
+    "paths": {
+      "@tamam/core": ["./libs/core/public-api.ts"],
+      "@tamam/shared": ["./libs/shared/public-api.ts"],
+      "@tamam/auth": ["./libs/feature/auth/public-api.ts"],
+      "@tamam/dashboard": ["./libs/feature/dashboard/public-api.ts"],
+      "@tamam/orders": ["./libs/feature/orders/public-api.ts"],
+      "@tamam/customers": ["./libs/feature/customers/public-api.ts"],
+      "@tamam/carriers": ["./libs/feature/carriers/public-api.ts"],
+      "@tamam/products": ["./libs/feature/products/public-api.ts"],
+      "@tamam/billing": ["./libs/feature/billing/public-api.ts"],
+      "@tamam/notifications": ["./libs/feature/notifications/public-api.ts"],
+      "@tamam/merchant": ["./libs/feature/merchant/public-api.ts"],
+      "@tamam/admin": ["./libs/feature/admin/public-api.ts"],
+      "@tamam/public-links": ["./libs/feature/public-links/public-api.ts"]
+    }
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,

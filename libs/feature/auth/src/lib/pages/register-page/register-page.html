@@ -1,0 +1,76 @@
+<form [formRoot]="registerForm">
+  <h1>إنشاء حساب</h1>
+
+  @if (serverError(); as message) {
+    <p class="alert" role="alert">{{ message }}</p>
+  }
+
+  <label>
+    اسم النشاط
+    <input type="text" autocomplete="organization" [formField]="registerForm.businessName" />
+    @if (registerForm.businessName().touched()) {
+      @for (error of registerForm.businessName().errors(); track error.kind) {
+        <span class="error">{{ error.message }}</span>
+      }
+    }
+  </label>
+
+  <label>
+    اسم المالك
+    <input type="text" autocomplete="name" [formField]="registerForm.ownerName" />
+    @if (registerForm.ownerName().touched()) {
+      @for (error of registerForm.ownerName().errors(); track error.kind) {
+        <span class="error">{{ error.message }}</span>
+      }
+    }
+  </label>
+
+  <label>
+    الدولة
+    <select [formField]="registerForm.countryCode">
+      <option value="">اختر الدولة</option>
+      @for (country of countries(); track country.code) {
+        <option [value]="country.code">{{ country.nameAr }}</option>
+      }
+    </select>
+    @if (registerForm.countryCode().touched()) {
+      @for (error of registerForm.countryCode().errors(); track error.kind) {
+        <span class="error">{{ error.message }}</span>
+      }
+    }
+  </label>
+
+  <label>
+    رقم الهاتف
+    <input type="tel" autocomplete="tel" [formField]="registerForm.phone" />
+    @if (registerForm.phone().touched()) {
+      @for (error of registerForm.phone().errors(); track error.kind) {
+        <span class="error">{{ error.message }}</span>
+      }
+    }
+  </label>
+
+  <label>
+    البريد الإلكتروني
+    <input type="email" autocomplete="email" [formField]="registerForm.email" />
+    @if (registerForm.email().touched()) {
+      @for (error of registerForm.email().errors(); track error.kind) {
+        <span class="error">{{ error.message }}</span>
+      }
+    }
+  </label>
+
+  <label>
+    كلمة المرور
+    <input type="password" autocomplete="new-password" [formField]="registerForm.password" />
+    @if (registerForm.password().touched()) {
+      @for (error of registerForm.password().errors(); track error.kind) {
+        <span class="error">{{ error.message }}</span>
+      }
+    }
+  </label>
+
+  <button type="submit" [disabled]="registerForm().submitting()">إنشاء الحساب</button>
+
+  <p>لديك حساب؟ <a routerLink="/auth/login">سجّل الدخول</a></p>
+</form>
