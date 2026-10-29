@@ -24,11 +24,19 @@
       <div class="col-sm-6">
         <tamam-field label="الدولة" [field]="registerForm.countryCode" [required]="true">
           <select class="form-select" [formField]="registerForm.countryCode">
-            <option value="">اختر الدولة</option>
+            <option value="">{{ countriesState() === 'loading' ? 'جارٍ تحميل الدول...' : 'اختر الدولة' }}</option>
             @for (country of countries(); track country.code) {
               <option [value]="country.code">{{ country.nameAr }}</option>
             }
           </select>
+          @if (countriesState() === 'error') {
+            <div class="small text-danger mt-1" role="alert">
+              تعذر تحميل قائمة الدول.
+              <button type="button" class="btn btn-link btn-sm p-0 align-baseline" (click)="loadCountries()">إعادة المحاولة</button>
+            </div>
+          } @else if (countriesState() === 'ready' && countries().length === 0) {
+            <div class="small text-danger mt-1" role="alert">لا توجد دول مفعّلة في قاعدة البيانات.</div>
+          }
         </tamam-field>
       </div>
       <div class="col-sm-6">
