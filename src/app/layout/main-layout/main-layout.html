@@ -1,0 +1,22 @@
+<div class="layout">
+  <aside class="sidebar">
+    <a class="brand" routerLink="/">تمام</a>
+
+    <nav aria-label="القائمة الرئيسية">
+      @for (item of items(); track item.path) {
+        <a [routerLink]="item.path" routerLinkActive="active">{{ item.label }}</a>
+      }
+    </nav>
+  </aside>
+
+  <div class="content">
+    <header class="topbar">
+      <span>{{ userStore.fullName() }}</span>
+      <button type="button" (click)="logout()">تسجيل الخروج</button>
+    </header>
+
+    <main>
+      <router-outlet />
+    </main>
+  </div>
+</div>

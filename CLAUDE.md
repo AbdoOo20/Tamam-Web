@@ -57,3 +57,16 @@ You are an expert in TypeScript, Angular, and scalable web application developme
 - Use the `providedIn: 'root'` option for singleton services
 - Prefer the `@Service` decorator over `@Injectable({providedIn: 'root'})` for new singleton services (Angular v22+)
 - Use the `inject()` function instead of constructor injection
+
+## Project architecture (Tamam)
+
+Read `docs/Architecture.md` before adding code. Rules:
+
+- Libraries live in `libs/` (outside `src/`): `core`, `shared`, and one library per feature in `libs/feature/<name>/`.
+- Import a library only through its alias and public API (`@tamam/<name>`), never a deep path. Features must not import each other.
+- Feature layout: `models/`, `services/`, `store/` (SignalStore), `pages/`, `components/`, `<name>.routes.ts`.
+- All HTTP goes through `ApiClient` (`@tamam/core`). All browser storage goes through `SecureStorage`; never use `localStorage` directly.
+- The signed-in user is `UserStore`; guards and the route table live in `src/app/app.routes.ts`.
+- Project-wide values (api url, storage secret) are in `src/environments/`, injected through `APP_ENVIRONMENT`.
+- The backend is https://github.com/AbdoOo20/Tamam; endpoints are documented in its `docs/API.md`.
+- Do not leave unused imports.

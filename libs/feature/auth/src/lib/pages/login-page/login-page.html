@@ -1,0 +1,31 @@
+<form [formRoot]="loginForm">
+  <h1>تسجيل الدخول</h1>
+
+  @if (serverError(); as message) {
+    <p class="alert" role="alert">{{ message }}</p>
+  }
+
+  <label>
+    البريد الإلكتروني
+    <input type="email" autocomplete="email" [formField]="loginForm.email" />
+    @if (loginForm.email().touched()) {
+      @for (error of loginForm.email().errors(); track error.kind) {
+        <span class="error">{{ error.message }}</span>
+      }
+    }
+  </label>
+
+  <label>
+    كلمة المرور
+    <input type="password" autocomplete="current-password" [formField]="loginForm.password" />
+    @if (loginForm.password().touched()) {
+      @for (error of loginForm.password().errors(); track error.kind) {
+        <span class="error">{{ error.message }}</span>
+      }
+    }
+  </label>
+
+  <button type="submit" [disabled]="loginForm().submitting()">دخول</button>
+
+  <p>ليس لديك حساب؟ <a routerLink="/auth/register">أنشئ حسابًا</a></p>
+</form>
