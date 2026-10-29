@@ -1,0 +1,145 @@
+@if (visible()) {
+  <section class="tm-card" aria-labelledby="outcome-title">
+    <div class="tm-card-header">
+      <span id="outcome-title">الرفض والمسؤولية</span>
+      @if (canReport()) {
+        <button type="button" class="btn btn-sm btn-primary" (click)="openReport()">
+          <i class="bi bi-flag" aria-hidden="true"></i> تسجيل سبب الرفض
+        </button>
+      }
+    </div>
+
+    <div class="tm-card-body d-grid gap-3">
+      @if (outcome(); as o) {
+        <div class="row g-3">
+          <div class="col-sm-6">
+            <div class="text-secondary small">النتيجة النهائية</div>
+            <div class="fw-bold">{{ resultLabel[o.finalResult] }}</div>
+          </div>
+          <div class="col-sm-6">
+            <div class="text-secondary small">المسؤول عن الرفض</div>
+            @if (o.attribution) {
+              <tamam-meta-badge kind="attribution" [value]="o.attribution" />
+            } @else {
+              <span>لم يُحدَّد بعد</span>
+            }
+            @if (o.isDisputed) {
+              <tamam-badge tone="warning" icon="bi-exclamation-triangle">موضع نزاع</tamam-badge>
+            }
+          </div>
+          @if (o.finalReasonId) {
+            <div class="col-12">
+              <div class="text-secondary small">السبب</div>
+              <div class="fw-semibold">{{ reasonLabel[o.finalReasonId] }}</div>
+            </div>
+          }
+        </div>
+
+        <div class="rounded-3 border p-3">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <strong>الخسارة</strong>
+            <button type="button" class="btn btn-sm btn-light" (click)="openLoss()"><i class="bi bi-pencil" aria-hidden="true"></i> تعديل</button>
+          </div>
+          <dl class="row mb-0 small">
+            <dt class="col-7 fw-normal text-secondary">شحن الذهاب</dt><dd class="col-5">{{ o.outboundShippingCost | money: order().currencyCode }}</dd>
+            <dt class="col-7 fw-normal text-secondary">شحن المرتجع</dt><dd class="col-5">{{ o.returnShippingCost | money: order().currencyCode }}</dd>
+            <dt class="col-7 fw-normal text-secondary">خسائر أخرى</dt><dd class="col-5">{{ o.otherLoss | money: order().currencyCode }}</dd>
+            <dt class="col-7 border-top pt-2">الإجمالي</dt><dd class="col-5 border-top pt-2 fw-bold text-danger">{{ o.lossAmount | money: order().currencyCode }}</dd>
+          </dl>
+        </div>
+      } @else if (canReport()) {
+        <p class="text-secondary mb-0">سجّل سبب الرفض ليُحدَّد المسؤول ويُحسب أثره في تقارير الجودة.</p>
+      }
+
+      @if (order().rejectionSurveyLink; as link) {
+        <div class="rounded-3 bg-light p-3">
+          <div class="fw-semibold mb-1">استبيان العميل</div>
+          <p class="small text-secondary mb-2">أرسل هذا الرابط للعميل ليذكر سبب الرفض من جهته، فيُحدَّد المسؤول بدقة.</p>
+          <tamam-copy-button [value]="link" label="نسخ رابط الاستبيان" />
+        </div>
+      }
+
+      @if (reports().length > 0) {
+        <div>
+          <div class="fw-semibold mb-2">البلاغات المسجلة</div>
+          <ul class="list-unstyled mb-0 d-grid gap-2">
+            @for (report of reports(); track report.id) {
+              <li class="border rounded-3 p-2 px-3">
+                <div class="d-flex justify-content-between gap-2">
+                  <span class="fw-semibold">{{ report.reasonName }}</span>
+                  <tamam-meta-badge kind="attribution" [value]="report.attribution" />
+                </div>
+                <div class="small text-secondary">
+                  {{ report.reporterType === 1 ? 'من العميل' : report.reporterType === 2 ? 'من التاجر' : 'من شركة الشحن' }}
+                  · {{ report.createdAt | tamamDate: 'datetime' }}
+                </div>
+                @if (report.details) {
+                  <div class="small mt-1">{{ report.details }}</div>
+                }
+                @if (report.evidenceUrl) {
+                  <a class="small" [href]="report.evidenceUrl" target="_blank" rel="noopener noreferrer">عرض الدليل</a>
+                }
+              </li>
+            }
+          </ul>
+        </div>
+      }
+    </div>
+  </section>
+}
+
+@if (reporting()) {
+  <tamam-modal title="تسجيل سبب الرفض" (closed)="reporting.set(false)">
+    <form [formRoot]="reasonForm" id="reason-form" novalidate>
+      @if (serverError(); as message) {
+        <div class="alert alert-danger" role="alert">{{ message }}</div>
+      }
+
+      <tamam-field label="سبب الرفض" [field]="reasonForm.reasonId">
+        <select class="form-select" [formField]="reasonForm.reasonId">
+          @for (reason of reasons; track reason.value) {
+            <option [value]="reason.value">{{ reason.label }}</option>
+          }
+        </select>
+      </tamam-field>
+
+      <tamam-field label="تفاصيل" [field]="reasonForm.details">
+        <textarea class="form-control" rows="3" [formField]="reasonForm.details"></textarea>
+      </tamam-field>
+
+      <tamam-field label="رابط دليل (اختياري)" [field]="reasonForm.evidenceUrl" hint="صورة أو إيصال يدعم السبب">
+        <input type="url" class="form-control" [formField]="reasonForm.evidenceUrl" />
+      </tamam-field>
+    </form>
+
+    <div modal-footer class="d-flex gap-2">
+      <button type="button" class="btn btn-light" (click)="reporting.set(false)">إلغاء</button>
+      <button type="submit" form="reason-form" class="btn btn-primary" [disabled]="reasonForm().submitting()">تسجيل</button>
+    </div>
+  </tamam-modal>
+}
+
+@if (editingLoss()) {
+  <tamam-modal title="تعديل الخسارة" (closed)="editingLoss.set(false)">
+    <form [formRoot]="lossForm" id="loss-form" novalidate>
+      @if (serverError(); as message) {
+        <div class="alert alert-danger" role="alert">{{ message }}</div>
+      }
+
+      <tamam-field label="شحن الذهاب" [field]="lossForm.outboundShippingCost">
+        <input type="number" class="form-control" step="0.01" [formField]="lossForm.outboundShippingCost" />
+      </tamam-field>
+      <tamam-field label="شحن المرتجع" [field]="lossForm.returnShippingCost">
+        <input type="number" class="form-control" step="0.01" [formField]="lossForm.returnShippingCost" />
+      </tamam-field>
+      <tamam-field label="خسائر أخرى" [field]="lossForm.otherLoss">
+        <input type="number" class="form-control" step="0.01" [formField]="lossForm.otherLoss" />
+      </tamam-field>
+    </form>
+
+    <div modal-footer class="d-flex gap-2">
+      <button type="button" class="btn btn-light" (click)="editingLoss.set(false)">إلغاء</button>
+      <button type="submit" form="loss-form" class="btn btn-primary" [disabled]="lossForm().submitting()">حفظ</button>
+    </div>
+  </tamam-modal>
+}

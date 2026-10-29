@@ -16,6 +16,7 @@
     "paths": {
       "@tamam/core": ["./libs/core/public-api.ts"],
       "@tamam/shared": ["./libs/shared/public-api.ts"],
+      "@tamam/landing": ["./libs/feature/landing/public-api.ts"],
       "@tamam/auth": ["./libs/feature/auth/public-api.ts"],
       "@tamam/dashboard": ["./libs/feature/dashboard/public-api.ts"],
       "@tamam/orders": ["./libs/feature/orders/public-api.ts"],

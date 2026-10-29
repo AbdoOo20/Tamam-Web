@@ -1,0 +1,49 @@
+<tamam-public-shell [storeName]="order()?.storeName ?? null">
+  @if (loading()) {
+    <tamam-loading />
+  } @else if (loadError(); as problem) {
+    <div class="tm-card p-4 text-center">
+      <span class="tm-icon-box mb-3"><i class="bi bi-link-45deg" aria-hidden="true"></i></span>
+      <h1 class="h4 fw-bold">{{ problem.title }}</h1>
+      <p class="text-secondary mb-0">{{ problem.text }}</p>
+    </div>
+  } @else if (done()) {
+    <div class="tm-card p-4 text-center" role="status">
+      <span class="tm-icon-box mb-3"><i class="bi bi-check2-circle" aria-hidden="true"></i></span>
+      <h1 class="h4 fw-bold">شكرًا لإجابتك</h1>
+      <p class="text-secondary mb-0">رأيك يساعد المتجر على تحسين خدمته.</p>
+    </div>
+  } @else if (order(); as o) {
+    <form [formRoot]="surveyForm" class="tm-card tm-card-body" novalidate>
+      <h1 class="h4 fw-bold mb-1">ما سبب عدم استلام طلبك؟</h1>
+      <p class="text-secondary">أهلًا {{ o.recipientName }}، إجابتك تأخذ نصف دقيقة وتساعدنا على معرفة ما حدث بدقة.</p>
+
+      @if (serverError(); as message) {
+        <div class="alert alert-danger" role="alert">{{ message }}</div>
+      }
+
+      <tamam-field label="السبب" [field]="surveyForm.reasonId">
+        <select class="form-select form-select-lg" [formField]="surveyForm.reasonId">
+          @for (reason of reasons(); track reason.id) {
+            <option [value]="reason.id">{{ reason.label }}</option>
+          }
+        </select>
+      </tamam-field>
+
+      <tamam-field label="تفاصيل إضافية (اختياري)" [field]="surveyForm.details">
+        <textarea class="form-control" rows="3" [formField]="surveyForm.details"></textarea>
+      </tamam-field>
+
+      @if (!o.canRespond) {
+        <div class="alert alert-info" role="status">تم استلام إجابتك من قبل أو انتهت مدة الاستبيان.</div>
+      }
+
+      <button type="submit" class="btn btn-primary btn-lg w-100" [disabled]="surveyForm().submitting() || !o.canRespond">
+        @if (surveyForm().submitting()) {
+          <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+        }
+        إرسال
+      </button>
+    </form>
+  }
+</tamam-public-shell>

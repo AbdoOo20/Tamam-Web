@@ -1,0 +1,263 @@
+<header class="nav-bar">
+  <div class="container d-flex align-items-center gap-3 py-3">
+    <a routerLink="/" class="text-decoration-none text-dark" aria-label="تمام - الرئيسية"><tamam-logo /></a>
+
+    <nav class="nav-links d-none d-lg-flex gap-4 me-4" aria-label="أقسام الصفحة">
+      <a href="#how">كيف يعمل</a>
+      <a href="#features">المزايا</a>
+      <a href="#fault">تحديد المسؤول</a>
+      <a href="#pricing">الأسعار</a>
+      <a href="#faq">أسئلة شائعة</a>
+    </nav>
+
+    <span class="flex-grow-1"></span>
+
+    <a routerLink="/auth/login" class="btn btn-link text-dark fw-semibold d-none d-sm-inline-flex">دخول</a>
+    <a routerLink="/auth/register" class="btn btn-primary d-none d-sm-inline-flex">ابدأ تجربة مجانية</a>
+
+    <button
+      type="button"
+      class="btn btn-light d-lg-none"
+      aria-label="القائمة"
+      [attr.aria-expanded]="menuOpen()"
+      aria-controls="mobile-nav"
+      (click)="toggleMenu()"
+    >
+      <i class="bi" [class]="menuOpen() ? 'bi-x-lg' : 'bi-list'" aria-hidden="true"></i>
+    </button>
+  </div>
+
+  @if (menuOpen()) {
+    <nav id="mobile-nav" class="container pb-3 d-grid gap-1 d-lg-none mobile-nav" aria-label="القائمة">
+      <a href="#how" (click)="toggleMenu()">كيف يعمل</a>
+      <a href="#features" (click)="toggleMenu()">المزايا</a>
+      <a href="#fault" (click)="toggleMenu()">تحديد المسؤول</a>
+      <a href="#pricing" (click)="toggleMenu()">الأسعار</a>
+      <a href="#faq" (click)="toggleMenu()">أسئلة شائعة</a>
+      <a routerLink="/auth/login">دخول</a>
+      <a routerLink="/auth/register" class="btn btn-primary mt-2">ابدأ تجربة مجانية</a>
+    </nav>
+  }
+</header>
+
+<main>
+  <!-- Hero -->
+  <section class="hero">
+    <div class="container">
+      <div class="row align-items-center g-5">
+        <div class="col-lg-6">
+          <p class="badge-line"><i class="bi bi-box-seam" aria-hidden="true"></i> للمتاجر التي تبيع بالدفع عند الاستلام</p>
+          <h1 class="display-title">اعرف أي طلب سيُرفض قبل أن يخرج من مخزنك</h1>
+          <p class="lead text-secondary mb-4">
+            تمام يقيّم كل طلب بدرجة مخاطرة وسبب مكتوب بالعربي، ويؤكده مع العميل على واتساب، ويحدد من المسؤول إذا رُفض.
+            القرار يبقى لك، والمعلومة تصلك قبل الشحن.
+          </p>
+          <div class="d-flex flex-wrap gap-2 mb-3">
+            <a routerLink="/auth/register" class="btn btn-primary btn-lg px-4">جرّب 14 يومًا مجانًا</a>
+            <a href="#how" class="btn btn-outline-dark btn-lg px-4">شاهد كيف يعمل</a>
+          </div>
+          <p class="small text-secondary mb-0"><i class="bi bi-credit-card-2-front-fill" aria-hidden="true"></i> بدون بطاقة دفع · يعمل مع أي متجر</p>
+        </div>
+
+        <div class="col-lg-6">
+          <div class="demo" aria-label="مثال توضيحي لتقييم طلب">
+            <div class="demo-tabs" role="tablist" aria-label="اختر حالة طلب">
+              @for (c of cases; track c.key) {
+                <button
+                  type="button"
+                  role="tab"
+                  [id]="'tab-' + c.key"
+                  [attr.aria-selected]="selected() === c.key"
+                  [attr.aria-controls]="'panel-' + c.key"
+                  [class.active]="selected() === c.key"
+                  (click)="select(c.key)"
+                >
+                  {{ c.tab }}
+                </button>
+              }
+            </div>
+
+            <div class="waybill" role="tabpanel" [id]="'panel-' + current().key" [attr.aria-labelledby]="'tab-' + current().key">
+              <div class="waybill-top">
+                <div>
+                  <div class="small text-secondary">مثال توضيحي</div>
+                  <div class="fw-bold fs-5">{{ current().customer }}</div>
+                  <div class="text-secondary small">{{ current().city }} · الدفع عند الاستلام {{ current().total }}</div>
+                </div>
+                <div class="ring" [attr.data-level]="current().key" [style.--score]="current().score" role="img" [attr.aria-label]="'درجة المخاطرة ' + current().score + ' من 100'">
+                  <span><strong>{{ current().score }}</strong><small class="ltr">/100</small></span>
+                </div>
+              </div>
+
+              <div class="level" [attr.data-level]="current().key">{{ current().level }}</div>
+
+              <ul class="signals">
+                @for (s of current().signals; track s.text) {
+                  <li>
+                    <span>{{ s.text }}</span>
+                    <b class="ltr" [class.neg]="s.points < 0">{{ s.points > 0 ? '+' : '' }}{{ s.points }}</b>
+                  </li>
+                }
+              </ul>
+
+              <div class="perforation" aria-hidden="true"></div>
+
+              <div class="waybill-foot">
+                <i class="bi bi-lightbulb" aria-hidden="true"></i>
+                <span>{{ current().action }}</span>
+              </div>
+              <div class="barcode" aria-hidden="true"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Problem -->
+  <section class="band-light">
+    <div class="container narrow">
+      <h2 class="section-title">الطلب المرفوض يكلّفك مرتين</h2>
+      <p class="section-lead">
+        تدفع الشحن ذهابًا، ثم تدفعه إيابًا، وتجمّد بضاعة كان يمكن بيعها لعميل آخر. وفي النهاية لا تعرف:
+        هل العميل هو السبب، أم المندوب، أم وصف المنتج؟ تمام يعطيك الإجابة بدل التخمين.
+      </p>
+    </div>
+  </section>
+
+  <!-- How -->
+  <section id="how" class="section">
+    <div class="container">
+      <h2 class="section-title">من الطلب إلى الاستلام في أربع خطوات</h2>
+      <ol class="steps">
+        @for (step of steps; track step.title; let i = $index) {
+          <li>
+            <span class="step-no" aria-hidden="true">{{ i + 1 }}</span>
+            <h3>{{ step.title }}</h3>
+            <p>{{ step.text }}</p>
+          </li>
+        }
+      </ol>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section id="features" class="section band-light">
+    <div class="container">
+      <h2 class="section-title">ما الذي تحصل عليه</h2>
+      <div class="feature-grid">
+        @for (f of features; track f.title) {
+          <div class="feature">
+            <i class="bi" [class]="f.icon" aria-hidden="true"></i>
+            <div>
+              <h3>{{ f.title }}</h3>
+              <p>{{ f.text }}</p>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- Fault -->
+  <section id="fault" class="fault">
+    <div class="container">
+      <div class="row g-5 align-items-center">
+        <div class="col-lg-5">
+          <h2 class="section-title text-white">لكل رفض مسؤول واضح</h2>
+          <p class="text-white-50 fs-5">
+            عند رفض الطلب نسأل العميل سؤالًا قصيرًا ونقارن إجابته بسبب التاجر. إذا اتفقا حُسم الأمر، وإذا اختلفا
+            يُسجَّل نزاع. هكذا لا تُحسب على عميل رفضٌ سببه التأخير، ولا تتحمل أنت خطأ المندوب.
+          </p>
+        </div>
+        <div class="col-lg-7">
+          <ul class="parties">
+            @for (p of parties; track p.name) {
+              <li>
+                <i class="bi" [class]="p.icon" aria-hidden="true"></i>
+                <div>
+                  <strong>{{ p.name }}</strong>
+                  <span>{{ p.text }}</span>
+                </div>
+              </li>
+            }
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing -->
+  <section id="pricing" class="section">
+    <div class="container">
+      <h2 class="section-title">ادفع على قدر استخدامك</h2>
+      <p class="section-lead mb-5">تبدأ بتجربة 14 يومًا، ثم تختار الباقة المناسبة. يمكنك تغييرها في أي وقت.</p>
+
+      @if (plans(); as list) {
+        @if (list.length > 0) {
+          <div class="row g-4 justify-content-center">
+            @for (plan of list; track plan.id) {
+              <div class="col-md-6 col-lg-4">
+                <div class="plan">
+                  <h3>{{ plan.nameAr }}</h3>
+                  <div class="price">
+                    {{ plan.monthlyFee | money: plan.currencyCode }}<small> / شهريًا</small>
+                  </div>
+                  <ul>
+                    @if (plan.includedOrders > 0) {
+                      <li><i class="bi bi-check2" aria-hidden="true"></i> {{ plan.includedOrders }} طلب مشمول</li>
+                    }
+                    <li>
+                      <i class="bi bi-check2" aria-hidden="true"></i>
+                      {{ plan.pricePerCheckedOrder | money: plan.currencyCode }} لكل طلب فُحص
+                    </li>
+                    <li><i class="bi bi-check2" aria-hidden="true"></i> تقييم مخاطر وتأكيد واتساب</li>
+                  </ul>
+                  <a routerLink="/auth/register" class="btn btn-outline-primary w-100">ابدأ بهذه الباقة</a>
+                </div>
+              </div>
+            }
+          </div>
+        } @else {
+          <p class="text-center text-secondary">الأسعار تظهر هنا عند تشغيل الخادم. سجّل الآن لتجربة 14 يومًا مجانًا.</p>
+        }
+      }
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section id="faq" class="section band-light">
+    <div class="container narrow">
+      <h2 class="section-title">أسئلة شائعة</h2>
+      <div class="faq">
+        @for (item of faqs; track item.q) {
+          <details>
+            <summary>{{ item.q }}</summary>
+            <p>{{ item.a }}</p>
+          </details>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta">
+    <div class="container text-center">
+      <h2>جرّب تمام على طلباتك هذا الأسبوع</h2>
+      <p>سجّل في دقيقة، وأضف أول طلب، وشاهد التقييم.</p>
+      <a routerLink="/auth/register" class="btn btn-light btn-lg px-5 fw-bold text-primary">ابدأ مجانًا</a>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="container d-flex flex-wrap align-items-center justify-content-between gap-3">
+    <tamam-logo [light]="true" />
+    <nav class="d-flex gap-4" aria-label="روابط التذييل">
+      <a href="#features">المزايا</a>
+      <a href="#pricing">الأسعار</a>
+      <a routerLink="/auth/login">دخول</a>
+    </nav>
+    <small>© تمام. جميع الحقوق محفوظة.</small>
+  </div>
+</footer>

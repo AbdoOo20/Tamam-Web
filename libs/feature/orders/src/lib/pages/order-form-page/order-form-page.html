@@ -1,0 +1,227 @@
+<tamam-page-header [title]="isEdit() ? 'تعديل بيانات الطلب' : 'طلب جديد'" subtitle="بعد الحفظ يُحسب تقييم المخاطر ويُجهَّز رابط التأكيد">
+  <a [routerLink]="isEdit() ? ['/orders', id()] : ['/orders']" class="btn btn-light">رجوع</a>
+</tamam-page-header>
+
+@if (loading()) {
+  <tamam-loading />
+} @else if (loadError(); as message) {
+  <div class="alert alert-danger" role="alert">{{ message }}</div>
+} @else {
+  <form [formRoot]="orderForm" novalidate>
+    @if (serverError(); as message) {
+      <div class="alert alert-danger d-flex gap-2" role="alert">
+        <i class="bi bi-exclamation-octagon-fill" aria-hidden="true"></i>
+        <span>{{ message }}</span>
+      </div>
+    }
+
+    <div class="row g-4">
+      <div class="col-lg-8 d-grid gap-4 align-content-start">
+        <section class="tm-card" aria-labelledby="sec-customer">
+          <div class="tm-card-header" id="sec-customer"><span>بيانات المستلم</span></div>
+          <div class="tm-card-body row">
+            <div class="col-md-6">
+              <tamam-field label="اسم المستلم" [field]="orderForm.recipientName" [required]="true">
+                <input type="text" class="form-control" autocomplete="off" [formField]="orderForm.recipientName" />
+              </tamam-field>
+            </div>
+            <div class="col-md-6">
+              <tamam-field
+                label="رقم الهاتف"
+                [field]="orderForm.recipientPhone"
+                [required]="true"
+                [hint]="isEdit() ? 'رقم الهاتف لا يمكن تغييره بعد تسجيل الطلب' : 'مثال: 01012345678'"
+              >
+                <input type="tel" class="form-control" [readOnly]="isEdit()" [formField]="orderForm.recipientPhone" />
+              </tamam-field>
+            </div>
+            <div class="col-md-6">
+              <tamam-field label="هاتف بديل" [field]="orderForm.altPhone">
+                <input type="tel" class="form-control" [formField]="orderForm.altPhone" />
+              </tamam-field>
+            </div>
+            @if (!isEdit()) {
+              <div class="col-md-6">
+                <tamam-field label="رقم الطلب" [field]="orderForm.orderNo" hint="اتركه فارغًا ليُولَّد تلقائيًا">
+                  <input type="text" class="form-control ltr" [formField]="orderForm.orderNo" />
+                </tamam-field>
+              </div>
+            }
+          </div>
+        </section>
+
+        <section class="tm-card" aria-labelledby="sec-address">
+          <div class="tm-card-header" id="sec-address"><span>العنوان</span></div>
+          <div class="tm-card-body row">
+            @if (regions().length > 0) {
+              <div class="col-md-6">
+                <tamam-field label="المحافظة / المنطقة" [field]="orderForm.regionId">
+                  <select class="form-select" [formField]="orderForm.regionId">
+                    <option value="">اختر</option>
+                    @for (region of regions(); track region.id) {
+                      <option [value]="region.id">{{ region.nameAr }}</option>
+                    }
+                  </select>
+                </tamam-field>
+              </div>
+            }
+            <div class="col-md-6">
+              <tamam-field label="المدينة / الحي" [field]="orderForm.city">
+                <input type="text" class="form-control" [formField]="orderForm.city" />
+              </tamam-field>
+            </div>
+            <div class="col-12">
+              <tamam-field label="العنوان بالتفصيل" [field]="orderForm.addressLine" [required]="true">
+                <textarea class="form-control" rows="2" [formField]="orderForm.addressLine"></textarea>
+              </tamam-field>
+            </div>
+            <div class="col-12">
+              <tamam-field label="علامة مميزة" [field]="orderForm.landmark" hint="العنوان الذي يحتوي علامة مميزة تقل مخاطره">
+                <input type="text" class="form-control" [formField]="orderForm.landmark" />
+              </tamam-field>
+            </div>
+          </div>
+        </section>
+
+        @if (!isEdit()) {
+          <section class="tm-card" aria-labelledby="sec-items">
+            <div class="tm-card-header" id="sec-items">
+              <span>المنتجات</span>
+              <button type="button" class="btn btn-sm btn-outline-primary" (click)="addItem()">
+                <i class="bi bi-plus-lg" aria-hidden="true"></i> إضافة منتج
+              </button>
+            </div>
+            <div class="tm-card-body d-grid gap-3">
+              @for (item of orderForm.items; track $index; let i = $index) {
+                <div class="border rounded-3 p-3">
+                  <div class="row">
+                    @if (products().items.length > 0) {
+                      <div class="col-12">
+                        <label class="form-label" [attr.for]="'pick-' + i">اختر من منتجاتك (اختياري)</label>
+                        <select class="form-select mb-3" [id]="'pick-' + i" (change)="pickProduct(i, $event)">
+                          <option value="">منتج يدوي</option>
+                          @for (product of products().items; track product.id) {
+                            <option [value]="product.id">{{ product.name }}</option>
+                          }
+                        </select>
+                      </div>
+                    }
+                    <div class="col-md-6">
+                      <tamam-field label="اسم المنتج" [field]="item.productName" [required]="true">
+                        <input type="text" class="form-control" [formField]="item.productName" />
+                      </tamam-field>
+                    </div>
+                    <div class="col-md-6">
+                      <tamam-field label="المقاس / اللون" [field]="item.variant">
+                        <input type="text" class="form-control" [formField]="item.variant" />
+                      </tamam-field>
+                    </div>
+                    <div class="col-6 col-md-4">
+                      <tamam-field label="الكمية" [field]="item.quantity" [required]="true">
+                        <input type="number" class="form-control" [formField]="item.quantity" />
+                      </tamam-field>
+                    </div>
+                    <div class="col-6 col-md-4">
+                      <tamam-field label="سعر الوحدة" [field]="item.unitPrice" [required]="true">
+                        <input type="number" class="form-control" step="0.01" [formField]="item.unitPrice" />
+                      </tamam-field>
+                    </div>
+                    <div class="col-md-4 d-flex align-items-end justify-content-between mb-3">
+                      <strong>{{ model().items[i].quantity * model().items[i].unitPrice | money: currency() }}</strong>
+                      @if (model().items.length > 1) {
+                        <button type="button" class="btn btn-sm btn-light text-danger" [attr.aria-label]="'حذف المنتج ' + (i + 1)" (click)="removeItem(i)">
+                          <i class="bi bi-trash" aria-hidden="true"></i>
+                        </button>
+                      }
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          </section>
+        }
+
+        <section class="tm-card" aria-labelledby="sec-notes">
+          <div class="tm-card-header" id="sec-notes"><span>ملاحظات</span></div>
+          <div class="tm-card-body">
+            <tamam-field label="ملاحظات على الطلب" [field]="orderForm.notes">
+              <textarea class="form-control" rows="2" [formField]="orderForm.notes"></textarea>
+            </tamam-field>
+          </div>
+        </section>
+      </div>
+
+      <div class="col-lg-4">
+        <div class="d-grid gap-4 position-sticky" style="top: 5rem">
+          <section class="tm-card" aria-labelledby="sec-pay">
+            <div class="tm-card-header" id="sec-pay"><span>الدفع والشحن</span></div>
+            <div class="tm-card-body">
+              <tamam-field label="طريقة الدفع" [field]="orderForm.paymentMethod">
+                <select class="form-select" [formField]="orderForm.paymentMethod">
+                  @for (method of paymentMethods; track method.value) {
+                    <option [value]="method.value">{{ method.label }}</option>
+                  }
+                </select>
+              </tamam-field>
+
+              @if (hasDeposit()) {
+                <tamam-field label="قيمة العربون" [field]="orderForm.depositAmount">
+                  <input type="number" class="form-control" step="0.01" [formField]="orderForm.depositAmount" />
+                </tamam-field>
+              }
+
+              <div class="row">
+                <div class="col-6">
+                  <tamam-field label="مصاريف الشحن" [field]="orderForm.shippingFee">
+                    <input type="number" class="form-control" step="0.01" [formField]="orderForm.shippingFee" />
+                  </tamam-field>
+                </div>
+                <div class="col-6">
+                  <tamam-field label="الخصم" [field]="orderForm.discountAmount">
+                    <input type="number" class="form-control" step="0.01" [formField]="orderForm.discountAmount" />
+                  </tamam-field>
+                </div>
+              </div>
+
+              <tamam-field label="شركة الشحن" [field]="orderForm.carrierId">
+                <select class="form-select" [formField]="orderForm.carrierId">
+                  <option value="">بدون</option>
+                  @for (carrier of carriers(); track carrier.id) {
+                    <option [value]="carrier.id">{{ carrier.name }}</option>
+                  }
+                </select>
+              </tamam-field>
+
+              @if (isEdit()) {
+                <tamam-field label="رقم التتبع" [field]="orderForm.trackingNo">
+                  <input type="text" class="form-control ltr" [formField]="orderForm.trackingNo" />
+                </tamam-field>
+              }
+
+              <tamam-field label="التسليم المتوقع" [field]="orderForm.expectedDeliveryDate">
+                <input type="date" class="form-control" [formField]="orderForm.expectedDeliveryDate" />
+              </tamam-field>
+            </div>
+          </section>
+
+          @if (!isEdit()) {
+            <section class="tm-card p-3" aria-label="ملخص الطلب">
+              <dl class="mb-0 d-grid gap-2">
+                <div class="d-flex justify-content-between"><dt class="fw-normal text-secondary">المنتجات</dt><dd class="mb-0">{{ itemsTotal() | money: currency() }}</dd></div>
+                <div class="d-flex justify-content-between"><dt class="fw-normal text-secondary">الإجمالي</dt><dd class="mb-0">{{ total() | money: currency() }}</dd></div>
+                <div class="d-flex justify-content-between border-top pt-2 fs-5 fw-bold"><dt>المطلوب تحصيله</dt><dd class="mb-0 text-primary">{{ toCollect() | money: currency() }}</dd></div>
+              </dl>
+            </section>
+          }
+
+          <button type="submit" class="btn btn-primary btn-lg" [disabled]="orderForm().submitting()">
+            @if (orderForm().submitting()) {
+              <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+            }
+            {{ isEdit() ? 'حفظ التعديلات' : 'تسجيل الطلب' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </form>
+}

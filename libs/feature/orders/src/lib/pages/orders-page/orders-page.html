@@ -1,0 +1,126 @@
+<tamam-page-header title="الطلبات" subtitle="كل طلباتك مع حالتها ودرجة مخاطرتها">
+  <a routerLink="import" class="btn btn-outline-primary"><i class="bi bi-upload" aria-hidden="true"></i> استيراد</a>
+  <a routerLink="new" class="btn btn-primary"><i class="bi bi-plus-lg" aria-hidden="true"></i> طلب جديد</a>
+</tamam-page-header>
+
+<div class="tm-card">
+  <div class="tm-card-header flex-wrap">
+    <div class="d-flex flex-wrap gap-2 flex-grow-1">
+      <div style="min-width: 16rem; max-width: 24rem; flex: 1">
+        <tamam-search-box
+          placeholder="ابحث برقم الطلب أو اسم العميل أو هاتفه"
+          [value]="store.filters().search"
+          (searched)="store.setFilters({ search: $event })"
+        />
+      </div>
+      <button type="button" class="btn btn-light" [attr.aria-expanded]="showFilters()" (click)="showFilters.set(!showFilters())">
+        <i class="bi bi-funnel" aria-hidden="true"></i> تصفية
+      </button>
+      @if (hasFilters()) {
+        <button type="button" class="btn btn-link text-danger" (click)="store.clearFilters()">مسح الفلاتر</button>
+      }
+    </div>
+  </div>
+
+  @if (showFilters()) {
+    <div class="row g-3 p-3 border-bottom bg-light">
+      <div class="col-sm-6 col-lg-3">
+        <label class="form-label" for="f-status">الحالة</label>
+        <select id="f-status" class="form-select" (change)="onSelect('statusId', $event)">
+          <option value="">الكل</option>
+          @for (option of statusOptions; track option.id) {
+            <option [value]="option.id" [selected]="store.filters().statusId === option.id">{{ option.label }}</option>
+          }
+        </select>
+      </div>
+      <div class="col-sm-6 col-lg-3">
+        <label class="form-label" for="f-risk">المخاطرة</label>
+        <select id="f-risk" class="form-select" (change)="onSelect('riskLevel', $event)">
+          <option value="">الكل</option>
+          @for (option of riskOptions; track option.id) {
+            <option [value]="option.id" [selected]="store.filters().riskLevel === option.id">{{ option.label }}</option>
+          }
+        </select>
+      </div>
+      <div class="col-sm-6 col-lg-2">
+        <label class="form-label" for="f-carrier">شركة الشحن</label>
+        <select id="f-carrier" class="form-select" (change)="onSelect('carrierId', $event)">
+          <option value="">الكل</option>
+          @for (carrier of carriers(); track carrier.id) {
+            <option [value]="carrier.id" [selected]="store.filters().carrierId === carrier.id">{{ carrier.name }}</option>
+          }
+        </select>
+      </div>
+      <div class="col-6 col-lg-2">
+        <label class="form-label" for="f-from">من تاريخ</label>
+        <input id="f-from" type="date" class="form-control" [value]="store.filters().from" (change)="onDate('from', $event)" />
+      </div>
+      <div class="col-6 col-lg-2">
+        <label class="form-label" for="f-to">إلى تاريخ</label>
+        <input id="f-to" type="date" class="form-control" [value]="store.filters().to" (change)="onDate('to', $event)" />
+      </div>
+    </div>
+  }
+
+  @if (store.loading() && store.items().length === 0) {
+    <div class="p-4"><tamam-loading variant="skeleton" [rows]="8" /></div>
+  } @else if (store.error(); as message) {
+    <tamam-empty-state icon="bi-wifi-off" title="تعذر التحميل" [description]="message">
+      <button type="button" class="btn btn-primary" (click)="store.load()">إعادة المحاولة</button>
+    </tamam-empty-state>
+  } @else if (store.items().length === 0) {
+    <tamam-empty-state
+      icon="bi-bag"
+      [title]="hasFilters() ? 'لا توجد طلبات مطابقة' : 'لا توجد طلبات بعد'"
+      [description]="hasFilters() ? 'غيّر الفلاتر أو امسحها لعرض كل الطلبات.' : 'سجّل أول طلب وشاهد تقييم المخاطر وتأكيد واتساب.'"
+    >
+      @if (hasFilters()) {
+        <button type="button" class="btn btn-outline-primary" (click)="store.clearFilters()">مسح الفلاتر</button>
+      } @else {
+        <a routerLink="new" class="btn btn-primary">تسجيل طلب</a>
+        <a routerLink="import" class="btn btn-outline-primary">استيراد من ملف</a>
+      }
+    </tamam-empty-state>
+  } @else {
+    <div class="table-responsive" [style.opacity]="store.loading() ? 0.6 : 1">
+      <table class="table tm-table">
+        <thead>
+          <tr>
+            <th scope="col">رقم الطلب</th>
+            <th scope="col">العميل</th>
+            <th scope="col">المدينة</th>
+            <th scope="col">المطلوب تحصيله</th>
+            <th scope="col">الحالة</th>
+            <th scope="col">المخاطرة</th>
+            <th scope="col">التسليم المتوقع</th>
+            <th scope="col">تاريخ الطلب</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (order of store.items(); track order.id) {
+            <tr>
+              <td class="fw-bold text-nowrap"><a [routerLink]="[order.id]" class="ltr">{{ order.orderNo }}</a></td>
+              <td style="max-width: 13rem">
+                <span class="fw-semibold" tamamTooltip>{{ order.recipientName }}</span>
+                <small class="text-secondary ltr d-block">{{ order.recipientPhoneE164 }}</small>
+              </td>
+              <td style="max-width: 9rem"><span tamamTooltip>{{ order.city || '—' }}</span></td>
+              <td class="text-nowrap fw-semibold">{{ order.amountToCollect | money: order.currencyCode }}</td>
+              <td><tamam-order-status [status]="order.statusId" /></td>
+              <td><tamam-risk-badge [level]="order.latestRiskLevel" [score]="order.latestRiskScore" /></td>
+              <td class="text-nowrap">{{ order.expectedDeliveryDate | tamamDate }}</td>
+              <td class="text-nowrap text-secondary">{{ order.placedAt | tamamDate: 'datetime' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <tamam-pagination
+      [page]="store.page()"
+      [totalPages]="store.totalPages()"
+      [totalCount]="store.totalCount()"
+      (pageChange)="store.setPage($event)"
+    />
+  }
+</div>

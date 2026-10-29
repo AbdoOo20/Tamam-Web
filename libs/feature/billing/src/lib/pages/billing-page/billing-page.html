@@ -1,0 +1,109 @@
+<tamam-page-header title="الاشتراك والفواتير" subtitle="باقتك الحالية واستخدامك هذا الشهر" />
+
+@if (store.loading() && store.plans().length === 0) {
+  <tamam-loading />
+} @else if (store.error(); as message) {
+  <tamam-empty-state icon="bi-wifi-off" title="تعذر التحميل" [description]="message">
+    <button type="button" class="btn btn-primary" (click)="store.load()">إعادة المحاولة</button>
+  </tamam-empty-state>
+} @else {
+  <div class="row g-4 mb-4">
+    <div class="col-lg-7">
+      <section class="tm-card h-100" aria-labelledby="current-plan">
+        <div class="tm-card-header">
+          <span id="current-plan">باقتك الحالية</span>
+          @if (store.subscription(); as sub) {
+            <tamam-meta-badge kind="subscription" [value]="sub.status" />
+          }
+        </div>
+        <div class="tm-card-body">
+          @if (store.subscription(); as sub) {
+            <div class="d-flex flex-wrap justify-content-between gap-3 mb-3">
+              <div>
+                <div class="h3 fw-bold mb-0">{{ sub.plan.nameAr }}</div>
+                <div class="text-secondary">{{ sub.plan.monthlyFee | money: sub.plan.currencyCode }} شهريًا</div>
+              </div>
+              <div class="text-end text-secondary small">
+                <div>بدأت {{ sub.startedAt | tamamDate }}</div>
+                @if (sub.trialEndsAt) {
+                  <div class="text-warning-emphasis fw-semibold">تنتهي التجربة {{ sub.trialEndsAt | tamamDate }}</div>
+                }
+              </div>
+            </div>
+
+            @if (sub.plan.includedOrders > 0) {
+              <div class="d-flex justify-content-between small mb-1">
+                <span>الطلبات المشمولة</span>
+                <span>{{ sub.usedOrders }} / {{ sub.plan.includedOrders }}</span>
+              </div>
+              <div class="progress" style="height: 0.7rem" role="progressbar" aria-label="استهلاك الطلبات المشمولة" [attr.aria-valuenow]="usedPercent()" aria-valuemin="0" aria-valuemax="100">
+                <div class="progress-bar" [class.bg-danger]="usedPercent() >= 90" [style.width.%]="usedPercent()"></div>
+              </div>
+              <div class="small text-secondary mt-2">المتبقي {{ sub.remainingIncludedOrders }} طلب، وما زاد عنها يُحاسَب بـ {{ sub.plan.pricePerCheckedOrder | money: sub.plan.currencyCode }} لكل طلب.</div>
+            } @else {
+              <p class="mb-0 text-secondary">تُحاسَب بـ {{ sub.plan.pricePerCheckedOrder | money: sub.plan.currencyCode }} لكل طلب يتم فحصه. استخدمت {{ sub.usedOrders }} طلبًا.</p>
+            }
+          } @else {
+            <p class="text-secondary mb-0">لا يوجد اشتراك فعّال. اختر باقة من الأسفل.</p>
+          }
+        </div>
+      </section>
+    </div>
+
+    <div class="col-lg-5">
+      <section class="tm-card h-100" aria-labelledby="usage">
+        <div class="tm-card-header"><span id="usage">استخدام هذا الشهر</span></div>
+        <div class="tm-card-body">
+          @if (store.usage(); as usage) {
+            @if (usage.lines.length === 0) {
+              <p class="text-secondary mb-0">لم يُسجَّل استخدام بعد هذا الشهر.</p>
+            } @else {
+              <ul class="list-unstyled mb-3">
+                @for (line of usage.lines; track line.type) {
+                  <li class="d-flex justify-content-between py-2 border-bottom">
+                    <span>{{ usageLabel[line.type] }} <span class="text-secondary">× {{ line.quantity }}</span></span>
+                    <span>{{ line.totalCost | money: store.subscription()?.plan?.currencyCode }}</span>
+                  </li>
+                }
+              </ul>
+              <div class="d-flex justify-content-between fw-bold fs-5">
+                <span>الإجمالي</span>
+                <span class="text-primary">{{ usage.totalCost | money: store.subscription()?.plan?.currencyCode }}</span>
+              </div>
+            }
+          } @else {
+            <p class="text-secondary mb-0">تعذر تحميل الاستخدام.</p>
+          }
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <h2 class="h4 fw-bold mb-3">الباقات المتاحة</h2>
+  <div class="row g-4">
+    @for (plan of store.plans(); track plan.id) {
+      <div class="col-md-6 col-xl-4">
+        <div class="tm-card p-4 h-100 d-flex flex-column" [class.border-primary]="store.subscription()?.plan?.code === plan.code">
+          <h3 class="h5 fw-bold">{{ plan.nameAr }}</h3>
+          <div class="fs-3 fw-bold mb-3">{{ plan.monthlyFee | money: plan.currencyCode }}<small class="fs-6 fw-normal text-secondary"> / شهريًا</small></div>
+          <ul class="list-unstyled d-grid gap-2 flex-grow-1">
+            @if (plan.includedOrders > 0) {
+              <li><i class="bi bi-check2 text-primary" aria-hidden="true"></i> {{ plan.includedOrders }} طلب مشمول</li>
+            }
+            <li><i class="bi bi-check2 text-primary" aria-hidden="true"></i> {{ plan.pricePerCheckedOrder | money: plan.currencyCode }} لكل طلب فُحص</li>
+          </ul>
+          @if (store.subscription()?.plan?.code === plan.code) {
+            <button type="button" class="btn btn-light" disabled>باقتك الحالية</button>
+          } @else {
+            <button type="button" class="btn btn-outline-primary" [disabled]="store.changing() !== null" (click)="choose(plan)">
+              @if (store.changing() === plan.code) {
+                <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+              }
+              اختيار هذه الباقة
+            </button>
+          }
+        </div>
+      </div>
+    }
+  </div>
+}

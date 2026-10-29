@@ -1,0 +1,77 @@
+<div class="d-flex gap-2 mb-3">
+  <select class="form-select w-auto" aria-label="حالة الطلب" (change)="setStatus($event)">
+    <option value="">كل الحالات</option>
+    @for (option of statusOptions; track option.id) {
+      <option [value]="option.id" [selected]="status() === option.id">{{ option.label }}</option>
+    }
+  </select>
+</div>
+
+@if (loading() && items().length === 0) {
+  <tamam-loading variant="skeleton" [rows]="4" />
+} @else if (error(); as message) {
+  <tamam-empty-state icon="bi-wifi-off" title="تعذر التحميل" [description]="message">
+    <button type="button" class="btn btn-primary" (click)="load()">إعادة المحاولة</button>
+  </tamam-empty-state>
+} @else if (items().length === 0) {
+  <tamam-empty-state icon="bi-inbox" title="لا توجد طلبات" description="طلبات العملاء لحذف بياناتهم أو الحصول عليها تظهر هنا." />
+} @else {
+  <div class="table-responsive">
+    <table class="table tm-table">
+      <thead>
+        <tr><th scope="col">#</th><th scope="col">النوع</th><th scope="col">العميل</th><th scope="col">تاريخ الطلب</th><th scope="col">الحالة</th><th scope="col"><span class="visually-hidden">إجراءات</span></th></tr>
+      </thead>
+      <tbody>
+        @for (request of items(); track request.id) {
+          <tr>
+            <td>{{ request.id }}</td>
+            <td class="fw-semibold">{{ typeLabel[request.type] }}</td>
+            <td class="ltr">{{ request.customerId ?? '—' }}</td>
+            <td class="text-nowrap">{{ request.requestedAt | tamamDate: 'datetime' }}</td>
+            <td><tamam-badge [tone]="statusMeta(request.status).tone" [icon]="statusMeta(request.status).icon">{{ statusMeta(request.status).label }}</tamam-badge></td>
+            <td class="text-end text-nowrap">
+              @if (request.status === Status.Open) {
+                @if (request.type === Type.Access) {
+                  <button type="button" class="btn btn-sm btn-light" (click)="export(request)">عرض البيانات</button>
+                }
+                <button type="button" class="btn btn-sm btn-primary" (click)="process(request, true)">تنفيذ</button>
+                <button type="button" class="btn btn-sm btn-outline-secondary" (click)="process(request, false)">رفض</button>
+              }
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <tamam-pagination [page]="page()" [totalPages]="totalPages()" [totalCount]="totalCount()" (pageChange)="goTo($event)" />
+}
+
+@if (exported(); as data) {
+  <tamam-modal title="بيانات العميل" size="lg" (closed)="exported.set(null)">
+    <p class="text-secondary">عميل <span class="ltr">#{{ data.customerId }}</span> · أول ظهور {{ data.firstSeenAt | tamamDate }}@if (data.isOptedOut) { · أوقف الرسائل }</p>
+    @if (data.orders.length === 0) {
+      <p class="mb-0">لا توجد طلبات مسجلة.</p>
+    } @else {
+      <div class="table-responsive">
+        <table class="table tm-table">
+          <thead><tr><th scope="col">المتجر</th><th scope="col">الطلب</th><th scope="col">التاريخ</th><th scope="col">الإجمالي</th><th scope="col">الحالة</th></tr></thead>
+          <tbody>
+            @for (order of data.orders; track order.orderNo + order.merchantName) {
+              <tr>
+                <td>{{ order.merchantName }}</td>
+                <td class="ltr">{{ order.orderNo }}</td>
+                <td class="text-nowrap">{{ order.placedAt | tamamDate }}</td>
+                <td>{{ order.totalAmount | money: order.currencyCode }}</td>
+                <td>{{ order.status }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+    <div modal-footer>
+      <button type="button" class="btn btn-primary" (click)="download(data)"><i class="bi bi-download" aria-hidden="true"></i> تحميل JSON</button>
+    </div>
+  </tamam-modal>
+}

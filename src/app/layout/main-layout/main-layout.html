@@ -1,21 +1,63 @@
-<div class="layout">
-  <aside class="sidebar">
-    <a class="brand" routerLink="/">تمام</a>
+<a class="visually-hidden-focusable btn btn-primary position-absolute top-0 start-0 m-2" href="#main-content">
+  تخطي إلى المحتوى
+</a>
+
+<div class="shell">
+  @if (menuOpen()) {
+    <button type="button" class="scrim" aria-label="إغلاق القائمة" (click)="toggleMenu()"></button>
+  }
+
+  <aside class="sidebar" [class.open]="menuOpen()" id="sidebar">
+    <a routerLink="/" class="brand" aria-label="تمام"><tamam-logo [light]="true" /></a>
 
     <nav aria-label="القائمة الرئيسية">
-      @for (item of items(); track item.path) {
-        <a [routerLink]="item.path" routerLinkActive="active">{{ item.label }}</a>
+      @for (group of groups(); track $index) {
+        @if (group.title) {
+          <div class="nav-title">{{ group.title }}</div>
+        }
+
+        @for (item of group.items; track item.path) {
+          <a [routerLink]="item.path" routerLinkActive="active" class="nav-item-link">
+            <i class="bi" [class]="item.icon" aria-hidden="true"></i>
+            <span>{{ item.label }}</span>
+          </a>
+        }
       }
     </nav>
+
+    <div class="user-card">
+      <span class="avatar" aria-hidden="true">{{ initial() }}</span>
+      <div class="user-meta">
+        <strong>{{ userStore.fullName() }}</strong>
+        <small>{{ roleLabel() }}</small>
+      </div>
+      <button type="button" class="logout" aria-label="تسجيل الخروج" (click)="logout()">
+        <i class="bi bi-box-arrow-left" aria-hidden="true"></i>
+      </button>
+    </div>
   </aside>
 
   <div class="content">
     <header class="topbar">
-      <span>{{ userStore.fullName() }}</span>
-      <button type="button" (click)="logout()">تسجيل الخروج</button>
+      <button
+        type="button"
+        class="btn btn-light menu-toggle"
+        aria-controls="sidebar"
+        [attr.aria-expanded]="menuOpen()"
+        aria-label="فتح القائمة"
+        (click)="toggleMenu()"
+      >
+        <i class="bi bi-list fs-5" aria-hidden="true"></i>
+      </button>
+
+      <span class="flex-grow-1"></span>
+
+      @if (showBell()) {
+        <tamam-notifications-bell />
+      }
     </header>
 
-    <main>
+    <main id="main-content" tabindex="-1">
       <router-outlet />
     </main>
   </div>

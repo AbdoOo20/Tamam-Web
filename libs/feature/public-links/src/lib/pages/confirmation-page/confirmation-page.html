@@ -1,0 +1,143 @@
+<tamam-public-shell [storeName]="order()?.storeName ?? null">
+  @if (loading()) {
+    <tamam-loading />
+  } @else if (loadError(); as problem) {
+    <div class="tm-card p-4 text-center">
+      <span class="tm-icon-box mb-3"><i class="bi bi-link-45deg" aria-hidden="true"></i></span>
+      <h1 class="h4 fw-bold">{{ problem.title }}</h1>
+      <p class="text-secondary mb-0">{{ problem.text }}</p>
+    </div>
+  } @else if (done(); as result) {
+    <div class="tm-card p-4 text-center" role="status">
+      <span class="tm-icon-box mb-3"><i class="bi" [class]="result === 'cancelled' ? 'bi-x-circle' : 'bi-check2-circle'" aria-hidden="true"></i></span>
+      @switch (result) {
+        @case ('confirmed') {
+          <h1 class="h4 fw-bold">تم تأكيد طلبك</h1>
+          <p class="text-secondary mb-0">شكرًا لك. سيتواصل معك المتجر ومندوب الشحن لإتمام التسليم.</p>
+        }
+        @case ('rescheduled') {
+          <h1 class="h4 fw-bold">وصل طلب التأجيل</h1>
+          <p class="text-secondary mb-0">سيراجع المتجر الموعد الذي اخترته ويتواصل معك.</p>
+        }
+        @case ('cancelled') {
+          <h1 class="h4 fw-bold">تم إلغاء طلبك</h1>
+          <p class="text-secondary mb-0">شكرًا لإخبارنا. نتمنى خدمتك في وقت آخر.</p>
+        }
+        @case ('optedOut') {
+          <h1 class="h4 fw-bold">تم إيقاف الرسائل</h1>
+          <p class="text-secondary mb-0">لن تصلك رسائل تأكيد من تمام على هذا الرقم.</p>
+        }
+        @case ('dataRequested') {
+          <h1 class="h4 fw-bold">استلمنا طلبك</h1>
+          <p class="text-secondary mb-0">سيراجع فريق تمام طلبك وننفذه في أقرب وقت.</p>
+        }
+      }
+    </div>
+  } @else if (order(); as o) {
+    <section class="tm-card mb-3" aria-labelledby="order-title">
+      <div class="tm-card-body">
+        <h1 class="h4 fw-bold mb-1" id="order-title">
+          {{ isSurvey() ? 'ملخص طلبك' : 'أكّد طلبك' }}
+        </h1>
+        <p class="text-secondary">أهلًا {{ o.recipientName }}، @if (isSurvey()) { هذا ملخص طلبك من } @else { راجع بيانات طلبك من } {{ o.storeName }}.</p>
+
+        <ul class="list-unstyled mb-3">
+          @for (item of o.items; track $index) {
+            <li class="d-flex justify-content-between gap-3 py-2 border-bottom">
+              <span>{{ item.name }}@if (item.variant) { <small class="text-secondary"> ({{ item.variant }})</small> } × {{ item.quantity }}</span>
+              <span class="text-nowrap">{{ item.quantity * item.unitPrice | money: o.currencyCode }}</span>
+            </li>
+          }
+        </ul>
+
+        <dl class="row mb-0 gy-2">
+          <dt class="col-5 fw-normal text-secondary">الإجمالي</dt>
+          <dd class="col-7 mb-0">{{ o.totalAmount | money: o.currencyCode }}</dd>
+          <dt class="col-5 fw-normal text-secondary">المطلوب دفعه عند الاستلام</dt>
+          <dd class="col-7 mb-0 fw-bold text-primary">{{ o.amountToCollect | money: o.currencyCode }}</dd>
+          <dt class="col-5 fw-normal text-secondary">العنوان</dt>
+          <dd class="col-7 mb-0">{{ o.addressLine }}@if (o.city) { ، {{ o.city }} }</dd>
+          @if (o.expectedDeliveryDate) {
+            <dt class="col-5 fw-normal text-secondary">موعد التسليم المتوقع</dt>
+            <dd class="col-7 mb-0">{{ o.expectedDeliveryDate | tamamDate }}</dd>
+          }
+        </dl>
+      </div>
+    </section>
+
+    @if (!o.canRespond || isSurvey()) {
+      <div class="alert alert-info" role="status">
+        {{ isSurvey() ? 'هذا الرابط مخصص لاستبيان الرفض.' : 'تم الرد على هذا الطلب من قبل، أو لم يعد ينتظر تأكيدك.' }}
+      </div>
+    } @else {
+      @if (action() === null) {
+        <div class="d-grid gap-2 mb-3">
+          <button type="button" class="btn btn-primary btn-lg" (click)="choose('confirm')"><i class="bi bi-check2-circle" aria-hidden="true"></i> أؤكد الطلب</button>
+          <button type="button" class="btn btn-outline-secondary btn-lg" (click)="choose('reschedule')"><i class="bi bi-calendar-event" aria-hidden="true"></i> أريد تأجيل التسليم</button>
+          <button type="button" class="btn btn-outline-danger btn-lg" (click)="choose('cancel')"><i class="bi bi-x-circle" aria-hidden="true"></i> أريد إلغاء الطلب</button>
+        </div>
+      } @else {
+        <form [formRoot]="responseForm" class="tm-card tm-card-body mb-3" novalidate>
+          <h2 class="h5 fw-bold mb-3">
+            @switch (action()) {
+              @case ('confirm') { تأكيد الطلب }
+              @case ('reschedule') { تأجيل التسليم }
+              @case ('cancel') { إلغاء الطلب }
+            }
+          </h2>
+
+          @if (serverError(); as message) {
+            <div class="alert alert-danger" role="alert">{{ message }}</div>
+          }
+
+          @if (action() === 'cancel') {
+            <tamam-field label="سبب الإلغاء" [field]="responseForm.reasonId">
+              <select class="form-select form-select-lg" [formField]="responseForm.reasonId">
+                @for (reason of reasons(); track reason.id) {
+                  <option [value]="reason.id">{{ reason.label }}</option>
+                }
+              </select>
+            </tamam-field>
+            <tamam-field label="تفاصيل إضافية (اختياري)" [field]="responseForm.details">
+              <textarea class="form-control" rows="3" [formField]="responseForm.details"></textarea>
+            </tamam-field>
+          } @else {
+            <tamam-field
+              [label]="action() === 'reschedule' ? 'الموعد المناسب لك' : 'موعد مفضل (اختياري)'"
+              [field]="responseForm.date"
+              [required]="action() === 'reschedule'"
+            >
+              <input type="date" class="form-control form-control-lg" [formField]="responseForm.date" />
+            </tamam-field>
+            <tamam-field label="ملاحظة للمتجر (اختياري)" [field]="responseForm.note">
+              <textarea class="form-control" rows="2" [formField]="responseForm.note"></textarea>
+            </tamam-field>
+          }
+
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-lg flex-grow-1" [class.btn-primary]="action() !== 'cancel'" [class.btn-danger]="action() === 'cancel'" [disabled]="responseForm().submitting()">
+              @if (responseForm().submitting()) {
+                <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+              }
+              إرسال
+            </button>
+            <button type="button" class="btn btn-lg btn-light" (click)="choose(null)">رجوع</button>
+          </div>
+        </form>
+      }
+    }
+
+    @if (serverError() && action() === null) {
+      <div class="alert alert-danger" role="alert">{{ serverError() }}</div>
+    }
+
+    <details class="small text-secondary mt-4">
+      <summary class="mb-2">خصوصيتك</summary>
+      <div class="d-flex flex-wrap gap-2">
+        <button type="button" class="btn btn-sm btn-outline-secondary" (click)="optOut()">إيقاف الرسائل على رقمي</button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" (click)="requestData('access')">أطلب نسخة من بياناتي</button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" (click)="requestData('delete')">أطلب حذف بياناتي</button>
+      </div>
+    </details>
+  }
+</tamam-public-shell>

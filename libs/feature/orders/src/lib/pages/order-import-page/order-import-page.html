@@ -1,0 +1,118 @@
+<tamam-page-header title="استيراد الطلبات" subtitle="ارفع ملف CSV بطلباتك دفعة واحدة (حتى 200 طلب)">
+  <a routerLink="/orders" class="btn btn-light">رجوع</a>
+</tamam-page-header>
+
+<div class="row g-4">
+  <div class="col-lg-5 d-grid gap-4 align-content-start">
+    <section class="tm-card" aria-labelledby="imp-1">
+      <div class="tm-card-header" id="imp-1"><span>1. جهّز الملف</span></div>
+      <div class="tm-card-body">
+        <p class="text-secondary">كل سطر يمثل منتجًا. الأسطر التي لها نفس <span class="ltr">orderNo</span> تُجمع في طلب واحد.</p>
+        <button type="button" class="btn btn-outline-primary" (click)="downloadTemplate()"><i class="bi bi-download" aria-hidden="true"></i> تحميل نموذج الملف</button>
+      </div>
+    </section>
+
+    <section class="tm-card" aria-labelledby="imp-2">
+      <div class="tm-card-header" id="imp-2"><span>2. اختر نوع الطلبات</span></div>
+      <div class="tm-card-body d-grid gap-2">
+        @for (option of kinds; track option.value) {
+          <label class="border rounded-3 p-3 d-flex gap-3" [class.border-primary]="kind() === option.value">
+            <input type="radio" name="kind" class="form-check-input mt-1" [checked]="kind() === option.value" (change)="kind.set(option.value)" />
+            <span><strong class="d-block">{{ option.label }}</strong><small class="text-secondary">{{ option.hint }}</small></span>
+          </label>
+        }
+      </div>
+    </section>
+
+    <section class="tm-card" aria-labelledby="imp-3">
+      <div class="tm-card-header" id="imp-3"><span>3. ارفع الملف</span></div>
+      <div class="tm-card-body">
+        <label class="form-label" for="csv-file">ملف CSV</label>
+        <input id="csv-file" type="file" class="form-control" accept=".csv,text/csv" (change)="onFile($event)" />
+      </div>
+    </section>
+  </div>
+
+  <div class="col-lg-7">
+    <section class="tm-card" aria-labelledby="imp-preview">
+      <div class="tm-card-header">
+        <span id="imp-preview">المعاينة</span>
+        @if (orders().length > 0) {
+          <tamam-badge tone="primary">{{ orders().length }} طلب</tamam-badge>
+        }
+      </div>
+
+      <div class="tm-card-body">
+        @if (serverError(); as message) {
+          <div class="alert alert-danger" role="alert">{{ message }}</div>
+        }
+
+        @if (tooMany()) {
+          <div class="alert alert-warning" role="alert">الحد الأقصى {{ 200 }} طلب في المرة الواحدة. قسّم الملف إلى أكثر من ملف.</div>
+        }
+
+        @if (problems().length > 0) {
+          <div class="alert alert-warning" role="alert">
+            <strong class="d-block mb-1">تم تجاهل بعض الأسطر:</strong>
+            <ul class="mb-0 ps-3">
+              @for (problem of problems().slice(0, 8); track problem) {
+                <li>{{ problem }}</li>
+              }
+              @if (problems().length > 8) {
+                <li>و {{ problems().length - 8 }} ملاحظات أخرى</li>
+              }
+            </ul>
+          </div>
+        }
+
+        @if (result(); as r) {
+          <div class="text-center py-4">
+            <span class="tm-icon-box mb-3"><i class="bi bi-check2-circle" aria-hidden="true"></i></span>
+            <h2 class="h5 fw-bold">اكتمل الاستيراد</h2>
+            <p class="mb-3">تم استيراد <strong>{{ r.rowsImported }}</strong> من {{ r.rowsTotal }} طلب@if (r.rowsFailed > 0) { وفشل <strong class="text-danger">{{ r.rowsFailed }}</strong> }.</p>
+            @if (r.errors.length > 0) {
+              <ul class="text-start small text-danger">
+                @for (error of r.errors; track error) {
+                  <li>{{ error }}</li>
+                }
+              </ul>
+            }
+            <div class="d-flex justify-content-center gap-2">
+              <a routerLink="/orders" class="btn btn-primary">عرض الطلبات</a>
+              <button type="button" class="btn btn-light" (click)="reset()">استيراد ملف آخر</button>
+            </div>
+          </div>
+        } @else if (orders().length === 0) {
+          <p class="text-secondary text-center py-4 mb-0">ستظهر هنا معاينة الطلبات بعد اختيار الملف.</p>
+        } @else {
+          <div class="table-responsive mb-3" style="max-height: 24rem">
+            <table class="table tm-table">
+              <thead>
+                <tr><th scope="col">رقم الطلب</th><th scope="col">المستلم</th><th scope="col">المنتجات</th><th scope="col">الإجمالي</th></tr>
+              </thead>
+              <tbody>
+                @for (order of orders().slice(0, 50); track $index) {
+                  <tr>
+                    <td class="ltr">{{ order.request.orderNo || 'تلقائي' }}</td>
+                    <td>{{ order.request.recipientName }}<small class="d-block text-secondary ltr">{{ order.request.recipientPhone }}</small></td>
+                    <td>{{ order.request.items.length }}</td>
+                    <td>{{ order.total | money }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+          @if (orders().length > 50) {
+            <p class="small text-secondary">تُعرض أول 50 طلبًا فقط في المعاينة.</p>
+          }
+          <button type="button" class="btn btn-primary btn-lg w-100" [disabled]="!canImport()" (click)="submit()">
+            @if (importing()) {
+              <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+            }
+            استيراد {{ orders().length }} طلب
+          </button>
+        }
+      </div>
+    </section>
+  </div>
+</div>

@@ -1,0 +1,56 @@
+.bell {
+  inline-size: 2.6rem;
+  block-size: 2.6rem;
+  padding: 0;
+  display: grid;
+  place-items: center;
+}
+
+.count {
+  position: absolute;
+  inset-block-start: -0.25rem;
+  inset-inline-end: -0.25rem;
+  font-size: 0.65rem;
+}
+
+.panel {
+  position: absolute;
+  inset-inline-end: 0;
+  inset-block-start: calc(100% + 0.5rem);
+  inline-size: min(24rem, calc(100vw - 2rem));
+  z-index: 1050;
+  overflow: hidden;
+  box-shadow: var(--tm-shadow-lg);
+}
+
+.list {
+  max-block-size: 24rem;
+  overflow-y: auto;
+}
+
+.item {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  color: inherit;
+  text-decoration: none;
+  border-block-end: 1px solid var(--tm-border);
+
+  &:hover {
+    background: #f8fafd;
+  }
+
+  &.unread {
+    background: var(--tm-primary-soft);
+  }
+
+  .tm-icon-box {
+    inline-size: 2.25rem;
+    block-size: 2.25rem;
+    font-size: 1rem;
+  }
+}
+
+.min-w-0 {
+  min-inline-size: 0;
+}

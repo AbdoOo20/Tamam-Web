@@ -1,0 +1,31 @@
+@if (loading()) {
+  <tamam-loading variant="skeleton" [rows]="3" />
+} @else {
+  <p class="text-secondary">استخدم المفتاح لإرسال طلبات متجرك إلى تمام تلقائيًا. نفس رقم الطلب لا يُسجَّل مرتين.</p>
+
+  <div class="d-flex flex-wrap align-items-center gap-3 mb-3">
+    <span>حالة المفتاح:</span>
+    <tamam-badge [tone]="hasKey() ? 'success' : 'secondary'">{{ hasKey() ? 'مفعّل' : 'غير موجود' }}</tamam-badge>
+    <button type="button" class="btn btn-primary" [disabled]="busy()" (click)="generate()">
+      <i class="bi bi-key" aria-hidden="true"></i> {{ hasKey() ? 'إنشاء مفتاح جديد' : 'إنشاء مفتاح' }}
+    </button>
+    @if (hasKey()) {
+      <button type="button" class="btn btn-outline-danger" (click)="revoke()">إلغاء المفتاح</button>
+    }
+  </div>
+
+  @if (newKey(); as key) {
+    <div class="alert alert-warning" role="status">
+      <strong class="d-block mb-1">انسخ المفتاح الآن</strong>
+      لن يظهر مرة أخرى بعد مغادرة هذه الصفحة.
+      <div class="d-flex flex-wrap align-items-center gap-2 mt-2">
+        <code class="ltr bg-white border rounded px-2 py-1 flex-grow-1 text-break user-select-all">{{ key }}</code>
+        <tamam-copy-button [value]="key" label="نسخ المفتاح" />
+      </div>
+    </div>
+  }
+
+  <h2 class="h6 fw-bold mt-4">مثال إرسال طلب</h2>
+  <pre class="ltr bg-dark text-light rounded-3 p-3 small mb-2" tabindex="0">{{ example() }}</pre>
+  <tamam-copy-button [value]="example()" label="نسخ المثال" />
+}

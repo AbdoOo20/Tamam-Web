@@ -4,58 +4,40 @@ import { ToastService } from '@tamam/core';
 @Component({
   selector: 'tamam-toast-host',
   template: `
-    <div class="toasts" aria-live="polite">
+    <div class="toast-container position-fixed bottom-0 start-0 p-3" aria-live="polite">
       @for (toast of toastService.toasts(); track toast.id) {
         <div
-          class="toast"
+          class="toast show align-items-center border-0 mb-2 text-white"
+          [class.bg-success]="toast.kind === 'success'"
+          [class.bg-danger]="toast.kind === 'error'"
+          [class.bg-dark]="toast.kind === 'info'"
           role="status"
-          [class.toast--error]="toast.kind === 'error'"
-          [class.toast--success]="toast.kind === 'success'"
         >
-          <span>{{ toast.message }}</span>
-          <button type="button" aria-label="إغلاق" (click)="toastService.dismiss(toast.id)">
-            ×
-          </button>
+          <div class="d-flex">
+            <div class="toast-body d-flex align-items-center gap-2">
+              <i
+                class="bi"
+                [class.bi-check-circle-fill]="toast.kind === 'success'"
+                [class.bi-exclamation-octagon-fill]="toast.kind === 'error'"
+                [class.bi-info-circle-fill]="toast.kind === 'info'"
+                aria-hidden="true"
+              ></i>
+              <span>{{ toast.message }}</span>
+            </div>
+            <button
+              type="button"
+              class="btn-close btn-close-white ms-2 me-auto m-auto"
+              aria-label="إغلاق"
+              (click)="toastService.dismiss(toast.id)"
+            ></button>
+          </div>
         </div>
       }
     </div>
   `,
   styles: `
-    .toasts {
-      position: fixed;
-      inset-block-end: 1rem;
-      inset-inline-start: 1rem;
-      display: grid;
-      gap: 0.5rem;
-      z-index: 1000;
-      max-inline-size: min(24rem, calc(100vw - 2rem));
-    }
-
-    .toast {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 1rem;
-      padding: 0.75rem 1rem;
-      border-radius: 0.5rem;
-      background: #1f2937;
-      color: #fff;
-    }
-
-    .toast--error {
-      background: #b91c1c;
-    }
-
-    .toast--success {
-      background: #15803d;
-    }
-
-    button {
-      border: 0;
-      background: transparent;
-      color: inherit;
-      font-size: 1.25rem;
-      cursor: pointer;
+    .toast-container {
+      z-index: 2100;
     }
   `,
 })

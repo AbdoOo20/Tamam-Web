@@ -1,0 +1,49 @@
+@if (confirmation(); as c) {
+  <section class="tm-card" aria-labelledby="confirm-title">
+    <div class="tm-card-header">
+      <span id="confirm-title">تأكيد الطلب مع العميل</span>
+      <tamam-meta-badge kind="confirmation" [value]="c.status" />
+    </div>
+
+    <div class="tm-card-body">
+      <p class="text-secondary small mb-2">الرسالة التي سيستلمها العميل:</p>
+      <pre class="message">{{ c.messageBody }}</pre>
+
+      <div class="d-flex flex-wrap gap-2 mb-3">
+        @if (canSend() && c.whatsAppUrl) {
+          <a class="btn btn-success" [href]="c.whatsAppUrl" target="_blank" rel="noopener noreferrer" (click)="markSent()">
+            <i class="bi bi-whatsapp" aria-hidden="true"></i> إرسال عبر واتساب
+          </a>
+        }
+        <tamam-copy-button [value]="c.link" label="نسخ الرابط" />
+        <tamam-copy-button [value]="c.messageBody" label="نسخ الرسالة" />
+        @if (canSend()) {
+          <button type="button" class="btn btn-sm btn-outline-secondary" [disabled]="busy()" (click)="regenerate()">
+            <i class="bi bi-arrow-repeat" aria-hidden="true"></i> رابط جديد
+          </button>
+        }
+      </div>
+
+      <dl class="row small mb-0 text-secondary">
+        <dt class="col-sm-4 fw-normal">ينتهي الرابط</dt>
+        <dd class="col-sm-8">{{ c.expiresAt | tamamDate: 'datetime' }}</dd>
+        @if (c.sentAt) {
+          <dt class="col-sm-4 fw-normal">وقت الإرسال</dt>
+          <dd class="col-sm-8">{{ c.sentAt | tamamDate: 'datetime' }}</dd>
+        }
+        @if (c.respondedAt) {
+          <dt class="col-sm-4 fw-normal">رد العميل</dt>
+          <dd class="col-sm-8">{{ c.respondedAt | tamamDate: 'datetime' }}</dd>
+        }
+        @if (c.proposedDeliveryDate) {
+          <dt class="col-sm-4 fw-normal">موعد مقترح</dt>
+          <dd class="col-sm-8 text-dark fw-semibold">{{ c.proposedDeliveryDate | tamamDate }}</dd>
+        }
+        @if (c.responseNote) {
+          <dt class="col-sm-4 fw-normal">ملاحظة العميل</dt>
+          <dd class="col-sm-8 text-dark">{{ c.responseNote }}</dd>
+        }
+      </dl>
+    </div>
+  </section>
+}

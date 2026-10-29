@@ -1,0 +1,59 @@
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <p class="text-secondary mb-0">الموظفون يديرون الطلبات والعملاء، ولا يصلون للاشتراك والإعدادات.</p>
+  <button type="button" class="btn btn-primary" (click)="open()"><i class="bi bi-person-plus" aria-hidden="true"></i> إضافة موظف</button>
+</div>
+
+@if (loading()) {
+  <tamam-loading variant="skeleton" [rows]="3" />
+} @else if (staff().length === 0) {
+  <tamam-empty-state icon="bi-people" title="لا يوجد موظفون" description="أضف موظفًا ليساعدك في متابعة الطلبات." />
+} @else {
+  <div class="table-responsive">
+    <table class="table tm-table">
+      <thead>
+        <tr><th scope="col">الاسم</th><th scope="col">البريد</th><th scope="col">الصلاحية</th><th scope="col">آخر دخول</th><th scope="col"><span class="visually-hidden">إجراءات</span></th></tr>
+      </thead>
+      <tbody>
+        @for (member of staff(); track member.id) {
+          <tr>
+            <td class="fw-semibold">{{ member.fullName }}</td>
+            <td class="ltr">{{ member.email }}</td>
+            <td><tamam-badge [tone]="member.role === 'Owner' ? 'primary' : 'secondary'">{{ member.role === 'Owner' ? 'مالك' : 'موظف' }}</tamam-badge></td>
+            <td>{{ member.lastLoginAt | tamamDate: 'datetime' }}</td>
+            <td class="text-end">
+              @if (member.role !== 'Owner') {
+                <button type="button" class="btn btn-sm btn-light text-danger" [attr.aria-label]="'حذف ' + member.fullName" (click)="remove(member)"><i class="bi bi-trash" aria-hidden="true"></i></button>
+              }
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}
+
+@if (adding()) {
+  <tamam-modal title="إضافة موظف" (closed)="adding.set(false)">
+    <form [formRoot]="staffForm" id="staff-form" novalidate>
+      @if (serverError(); as message) {
+        <div class="alert alert-danger" role="alert">{{ message }}</div>
+      }
+      <tamam-field label="الاسم" [field]="staffForm.fullName" [required]="true">
+        <input type="text" class="form-control" [formField]="staffForm.fullName" />
+      </tamam-field>
+      <tamam-field label="البريد الإلكتروني" [field]="staffForm.email" [required]="true">
+        <input type="email" class="form-control" autocomplete="off" [formField]="staffForm.email" />
+      </tamam-field>
+      <tamam-field label="الهاتف" [field]="staffForm.phoneNumber">
+        <input type="tel" class="form-control" [formField]="staffForm.phoneNumber" />
+      </tamam-field>
+      <tamam-field label="كلمة المرور" [field]="staffForm.password" hint="8 أحرف على الأقل. أبلغها للموظف ليغيّرها لاحقًا." [required]="true">
+        <input type="password" class="form-control" autocomplete="new-password" [formField]="staffForm.password" />
+      </tamam-field>
+    </form>
+    <div modal-footer class="d-flex gap-2">
+      <button type="button" class="btn btn-light" (click)="adding.set(false)">إلغاء</button>
+      <button type="submit" form="staff-form" class="btn btn-primary" [disabled]="staffForm().submitting()">إضافة</button>
+    </div>
+  </tamam-modal>
+}

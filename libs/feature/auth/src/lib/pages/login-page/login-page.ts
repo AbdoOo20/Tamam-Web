@@ -1,14 +1,16 @@
 import { Component, inject, input, signal } from '@angular/core';
 import { email, form, FormField, FormRoot, required } from '@angular/forms/signals';
 import { Router, RouterLink } from '@angular/router';
-import { homeRouteFor, isApiError, UserService, UserStore } from '@tamam/core';
+import { errorText, homeRouteFor, isApiError, UserService, UserStore } from '@tamam/core';
+import { Field } from '@tamam/shared';
 import { firstValueFrom } from 'rxjs';
+
+import { AuthShell } from '../../components/auth-shell/auth-shell';
 
 @Component({
   selector: 'tamam-login-page',
-  imports: [FormRoot, FormField, RouterLink],
+  imports: [FormRoot, FormField, RouterLink, Field, AuthShell],
   templateUrl: './login-page.html',
-  styleUrl: '../auth-form.scss',
 })
 export class LoginPage {
   private readonly userService = inject(UserService);
@@ -42,9 +44,7 @@ export class LoginPage {
             this.serverError.set(
               isApiError(error) && error.statusCode === 401
                 ? 'البريد الإلكتروني أو كلمة المرور غير صحيحة'
-                : isApiError(error)
-                  ? error.message
-                  : 'تعذر تسجيل الدخول، حاول مرة أخرى',
+                : errorText(error, 'تعذر تسجيل الدخول، حاول مرة أخرى'),
             );
           }
         },

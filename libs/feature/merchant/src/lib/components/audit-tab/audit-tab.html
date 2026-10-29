@@ -1,0 +1,65 @@
+<div class="d-flex flex-wrap gap-2 mb-3">
+  <select class="form-select w-auto" aria-label="نوع العنصر" (change)="filter('entityName', $event)">
+    <option value="">كل العناصر</option>
+    @for (entity of entities; track entity[0]) {
+      <option [value]="entity[0]">{{ entity[1] }}</option>
+    }
+  </select>
+  <select class="form-select w-auto" aria-label="نوع العملية" (change)="filter('action', $event)">
+    <option value="">كل العمليات</option>
+    @for (action of actions; track action[0]) {
+      <option [value]="action[0]">{{ action[1] }}</option>
+    }
+  </select>
+</div>
+
+@if (loading() && items().length === 0) {
+  <tamam-loading variant="skeleton" [rows]="6" />
+} @else if (error(); as message) {
+  <tamam-empty-state icon="bi-wifi-off" title="تعذر التحميل" [description]="message">
+    <button type="button" class="btn btn-primary" (click)="load()">إعادة المحاولة</button>
+  </tamam-empty-state>
+} @else if (items().length === 0) {
+  <tamam-empty-state icon="bi-journal-text" title="لا توجد سجلات" description="تظهر هنا كل تعديلات فريقك على الطلبات والمنتجات والإعدادات." />
+} @else {
+  <div class="table-responsive">
+    <table class="table tm-table">
+      <thead>
+        <tr><th scope="col">الوقت</th><th scope="col">المستخدم</th><th scope="col">العملية</th><th scope="col">العنصر</th><th scope="col"><span class="visually-hidden">التفاصيل</span></th></tr>
+      </thead>
+      <tbody>
+        @for (log of items(); track log.id) {
+          <tr>
+            <td class="text-nowrap">{{ log.createdAt | tamamDate: 'datetime' }}</td>
+            <td style="max-width: 12rem"><span tamamTooltip>{{ log.userName || 'النظام' }}</span></td>
+            <td><tamam-badge [tone]="actionTone(log.action)">{{ actionLabel(log.action) }}</tamam-badge></td>
+            <td>{{ entityLabel(log.entityName) }} <span class="text-secondary ltr">#{{ log.entityId }}</span></td>
+            <td class="text-end">
+              @if (log.oldValues || log.newValues) {
+                <button type="button" class="btn btn-sm btn-light" [attr.aria-expanded]="expanded() === log.id" (click)="toggle(log.id)">
+                  {{ expanded() === log.id ? 'إخفاء' : 'التفاصيل' }}
+                </button>
+              }
+            </td>
+          </tr>
+          @if (expanded() === log.id) {
+            <tr>
+              <td colspan="5" class="bg-light">
+                <div class="row g-3">
+                  @if (log.oldValues) {
+                    <div class="col-md-6"><div class="small fw-bold mb-1">قبل</div><pre class="ltr small mb-0">{{ pretty(log.oldValues) }}</pre></div>
+                  }
+                  @if (log.newValues) {
+                    <div class="col-md-6"><div class="small fw-bold mb-1">بعد</div><pre class="ltr small mb-0">{{ pretty(log.newValues) }}</pre></div>
+                  }
+                </div>
+              </td>
+            </tr>
+          }
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <tamam-pagination [page]="page()" [totalPages]="totalPages()" [totalCount]="totalCount()" (pageChange)="goTo($event)" />
+}
