@@ -1,0 +1,144 @@
+@if (store.loading() && !store.order()) {
+  <tamam-loading />
+} @else if (store.error() && !store.order()) {
+  <tamam-empty-state icon="bi-search" title="تعذر عرض الطلب" [description]="store.error() ?? ''">
+    <a routerLink="/orders" class="btn btn-primary">العودة للطلبات</a>
+  </tamam-empty-state>
+} @else if (store.order(); as order) {
+  <nav aria-label="مسار الصفحة" class="mb-3">
+    <a routerLink="/orders" class="text-decoration-none"><i class="bi bi-arrow-right" aria-hidden="true"></i> كل الطلبات</a>
+  </nav>
+
+  <div class="d-flex flex-wrap align-items-start justify-content-between gap-3 mb-4">
+    <div>
+      <h1 class="h3 fw-bold mb-2 d-flex flex-wrap align-items-center gap-2">
+        <span>طلب <span class="ltr">{{ order.orderNo }}</span></span>
+        <tamam-order-status [status]="order.statusId" />
+        <tamam-risk-badge [level]="order.risk?.level" [score]="order.risk?.score" />
+      </h1>
+      <p class="text-secondary mb-0">
+        سُجّل {{ order.placedAt | tamamDate: 'datetime' }}
+        @if (order.isHistorical) {
+          · طلب تاريخي مستورد
+        }
+      </p>
+    </div>
+
+    <div class="d-flex flex-wrap gap-2">
+      @if (canChangeStatus(order.statusId)) {
+        <button type="button" class="btn btn-primary" (click)="changingStatus.set(true)">
+          <i class="bi bi-arrow-left-right" aria-hidden="true"></i> تغيير الحالة
+        </button>
+      }
+      <a [routerLink]="['/orders', order.id, 'edit']" class="btn btn-outline-secondary"><i class="bi bi-pencil" aria-hidden="true"></i> تعديل</a>
+      <button type="button" class="btn btn-outline-danger" (click)="remove()"><i class="bi bi-trash" aria-hidden="true"></i> حذف</button>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-xl-8 d-grid gap-4 align-content-start">
+      <tamam-order-risk-panel [order]="order" />
+      <tamam-order-confirmation-panel [order]="order" />
+      <tamam-order-items-card [order]="order" />
+      <tamam-order-attempts-card [order]="order" />
+      <tamam-order-outcome-card [order]="order" />
+    </div>
+
+    <div class="col-xl-4 d-grid gap-4 align-content-start">
+      <section class="tm-card" aria-labelledby="recipient-title">
+        <div class="tm-card-header"><span id="recipient-title">المستلم</span></div>
+        <div class="tm-card-body d-grid gap-3">
+          <div>
+            <div class="fw-bold fs-5">{{ order.recipientName }}</div>
+            <div class="d-flex flex-wrap align-items-center gap-2 mt-1">
+              <span class="ltr">{{ order.recipientPhoneE164 }}</span>
+              <a class="btn btn-sm btn-outline-success" [href]="whatsAppLink(order.recipientPhoneE164)" target="_blank" rel="noopener noreferrer" aria-label="مراسلة المستلم على واتساب">
+                <i class="bi bi-whatsapp" aria-hidden="true"></i>
+              </a>
+              <a class="btn btn-sm btn-outline-secondary" [href]="'tel:' + order.recipientPhoneE164" aria-label="اتصال بالمستلم"><i class="bi bi-telephone" aria-hidden="true"></i></a>
+            </div>
+            @if (order.altPhoneE164) {
+              <div class="small text-secondary mt-1">هاتف بديل: <span class="ltr">{{ order.altPhoneE164 }}</span></div>
+            }
+          </div>
+
+          <div>
+            <div class="text-secondary small">العنوان</div>
+            <div>{{ order.addressLine }}</div>
+            @if (order.city) {
+              <div class="text-secondary">{{ order.city }}</div>
+            }
+            @if (order.landmark) {
+              <div class="small"><i class="bi bi-signpost" aria-hidden="true"></i> {{ order.landmark }}</div>
+            }
+          </div>
+        </div>
+      </section>
+
+      <section class="tm-card" aria-labelledby="ship-title">
+        <div class="tm-card-header"><span id="ship-title">الدفع والشحن</span></div>
+        <dl class="tm-card-body row mb-0 gy-2">
+          <dt class="col-5 fw-normal text-secondary">طريقة الدفع</dt>
+          <dd class="col-7 mb-0">{{ payment[order.paymentMethod] }}</dd>
+          <dt class="col-5 fw-normal text-secondary">المطلوب تحصيله</dt>
+          <dd class="col-7 mb-0 fw-bold text-primary">{{ order.amountToCollect | money: order.currencyCode }}</dd>
+          <dt class="col-5 fw-normal text-secondary">شركة الشحن</dt>
+          <dd class="col-7 mb-0">{{ order.carrierName || '—' }}</dd>
+          @if (order.trackingNo) {
+            <dt class="col-5 fw-normal text-secondary">رقم التتبع</dt>
+            <dd class="col-7 mb-0 ltr">{{ order.trackingNo }}</dd>
+          }
+          <dt class="col-5 fw-normal text-secondary">التسليم المتوقع</dt>
+          <dd class="col-7 mb-0">{{ order.expectedDeliveryDate | tamamDate }}</dd>
+          @if (order.shippedAt) {
+            <dt class="col-5 fw-normal text-secondary">تاريخ الشحن</dt>
+            <dd class="col-7 mb-0">{{ order.shippedAt | tamamDate }}</dd>
+          }
+          @if (order.deliveredAt) {
+            <dt class="col-5 fw-normal text-secondary">تاريخ التسليم</dt>
+            <dd class="col-7 mb-0">{{ order.deliveredAt | tamamDate }}</dd>
+          }
+        </dl>
+      </section>
+
+      @if (order.notes) {
+        <section class="tm-card p-3">
+          <div class="text-secondary small mb-1">ملاحظات</div>
+          <div>{{ order.notes }}</div>
+        </section>
+      }
+
+      <tamam-order-timeline [history]="order.statusHistory" />
+
+      <section class="tm-card" aria-labelledby="messages-title">
+        <div class="tm-card-header">
+          <span id="messages-title">سجل الرسائل</span>
+          @if (messages() === null) {
+            <button type="button" class="btn btn-sm btn-light" [disabled]="loadingMessages()" (click)="loadMessages()">عرض</button>
+          }
+        </div>
+        @if (messages(); as list) {
+          @if (list.length === 0) {
+            <div class="tm-card-body text-secondary">لا توجد رسائل مسجلة.</div>
+          } @else {
+            <ul class="list-unstyled mb-0">
+              @for (message of list; track message.id) {
+                <li class="p-3 border-bottom small">
+                  <div class="d-flex justify-content-between text-secondary">
+                    <span>{{ message.direction === 1 ? 'صادرة' : 'واردة' }} · {{ deliveryLabel[message.deliveryStatus] }}</span>
+                    <span>{{ message.createdAt | tamamDate: 'datetime' }}</span>
+                  </div>
+                  <div class="mt-1" style="white-space: pre-wrap">{{ message.body }}</div>
+                </li>
+              }
+            </ul>
+          }
+        }
+      </section>
+    </div>
+  </div>
+
+  @if (changingStatus()) {
+    <tamam-order-status-dialog [order]="order" (closed)="changingStatus.set(false)" />
+  }
+}

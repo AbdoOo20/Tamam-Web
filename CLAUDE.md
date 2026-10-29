@@ -70,3 +70,9 @@ Read `docs/Architecture.md` before adding code. Rules:
 - Project-wide values (api url, storage secret) are in `src/environments/`, injected through `APP_ENVIRONMENT`.
 - The backend is https://github.com/AbdoOo20/Tamam; endpoints are documented in its `docs/API.md`.
 - Do not leave unused imports.
+
+## Class member order (TypeScript)
+
+- Order inside every class: fields first, then lifecycle hooks (`ngOnInit`, `ngAfterViewInit`, `ngOnDestroy`...), then `constructor`, then the other methods.
+- Fields sit directly under each other with no blank lines between them.
+- Put exactly one blank line between every method, hook and the constructor.

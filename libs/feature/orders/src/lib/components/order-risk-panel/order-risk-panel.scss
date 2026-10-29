@@ -1,0 +1,29 @@
+.ring {
+  --color: #07805f;
+
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  inline-size: 4.5rem;
+  block-size: 4.5rem;
+  border-radius: 50%;
+  background: conic-gradient(var(--color) calc(var(--score) * 1%), #e9edf3 0);
+
+  &.level-warning {
+    --color: #d98a00;
+  }
+
+  &.level-danger {
+    --color: #cf2e2e;
+  }
+
+  span {
+    display: grid;
+    place-items: center;
+    inline-size: 3.4rem;
+    block-size: 3.4rem;
+    border-radius: 50%;
+    background: #fff;
+    font-size: 1.25rem;
+  }
+}

@@ -1,6 +1,7 @@
 export * from './src/lib/config/app-environment';
 export * from './src/lib/api/api-result.model';
 export * from './src/lib/api/api-error';
+export * from './src/lib/api/error-text';
 export * from './src/lib/api/api-client';
 export * from './src/lib/storage/storage-keys';
 export * from './src/lib/storage/secure-storage';

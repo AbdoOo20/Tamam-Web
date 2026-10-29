@@ -1,0 +1,80 @@
+<div class="d-flex justify-content-end mb-3">
+  <button type="button" class="btn btn-primary" (click)="open(null)"><i class="bi bi-plus-lg" aria-hidden="true"></i> باقة جديدة</button>
+</div>
+
+@if (loading()) {
+  <tamam-loading variant="skeleton" [rows]="3" />
+} @else if (plans().length === 0) {
+  <tamam-empty-state icon="bi-credit-card" title="لا توجد باقات" />
+} @else {
+  <div class="table-responsive">
+    <table class="table tm-table">
+      <thead>
+        <tr><th scope="col">الباقة</th><th scope="col">الكود</th><th scope="col">الشهري</th><th scope="col">سعر الطلب</th><th scope="col">طلبات مشمولة</th><th scope="col">الحالة</th><th scope="col"><span class="visually-hidden">إجراءات</span></th></tr>
+      </thead>
+      <tbody>
+        @for (plan of plans(); track plan.id) {
+          <tr>
+            <td class="fw-semibold">{{ plan.nameAr }}</td>
+            <td class="ltr">{{ plan.code }}</td>
+            <td>{{ plan.monthlyFee | money: plan.currencyCode }}</td>
+            <td>{{ plan.pricePerCheckedOrder | money: plan.currencyCode }}</td>
+            <td>{{ plan.includedOrders }}</td>
+            <td><tamam-badge [tone]="plan.isActive ? 'success' : 'secondary'">{{ plan.isActive ? 'فعّالة' : 'متوقفة' }}</tamam-badge></td>
+            <td class="text-end"><button type="button" class="btn btn-sm btn-light" [attr.aria-label]="'تعديل ' + plan.nameAr" (click)="open(plan)"><i class="bi bi-pencil" aria-hidden="true"></i></button></td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}
+
+@if (editing() !== undefined) {
+  <tamam-modal [title]="editing() ? 'تعديل الباقة' : 'باقة جديدة'" (closed)="editing.set(undefined)">
+    <form [formRoot]="planForm" id="plan-form" novalidate>
+      @if (serverError(); as message) {
+        <div class="alert alert-danger" role="alert">{{ message }}</div>
+      }
+      <div class="row">
+        <div class="col-6">
+          <tamam-field label="الكود" [field]="planForm.code" [required]="true" [hint]="editing() ? 'لا يمكن تغيير الكود' : ''">
+            <input type="text" class="form-control ltr" [readOnly]="!!editing()" [formField]="planForm.code" />
+          </tamam-field>
+        </div>
+        <div class="col-6">
+          <tamam-field label="الاسم" [field]="planForm.nameAr" [required]="true">
+            <input type="text" class="form-control" [formField]="planForm.nameAr" />
+          </tamam-field>
+        </div>
+        <div class="col-6">
+          <tamam-field label="الاشتراك الشهري" [field]="planForm.monthlyFee">
+            <input type="number" class="form-control" step="0.01" [formField]="planForm.monthlyFee" />
+          </tamam-field>
+        </div>
+        <div class="col-6">
+          <tamam-field label="سعر الطلب المفحوص" [field]="planForm.pricePerCheckedOrder">
+            <input type="number" class="form-control" step="0.01" [formField]="planForm.pricePerCheckedOrder" />
+          </tamam-field>
+        </div>
+        <div class="col-6">
+          <tamam-field label="طلبات مشمولة" [field]="planForm.includedOrders">
+            <input type="number" class="form-control" [formField]="planForm.includedOrders" />
+          </tamam-field>
+        </div>
+        <div class="col-6">
+          <tamam-field label="العملة" [field]="planForm.currencyCode" [required]="true">
+            <input type="text" class="form-control ltr" [formField]="planForm.currencyCode" />
+          </tamam-field>
+        </div>
+      </div>
+      <div class="form-check form-switch">
+        <input class="form-check-input" type="checkbox" role="switch" id="plan-active" [formField]="planForm.isActive" />
+        <label class="form-check-label" for="plan-active">باقة فعّالة</label>
+      </div>
+    </form>
+    <div modal-footer class="d-flex gap-2">
+      <button type="button" class="btn btn-light" (click)="editing.set(undefined)">إلغاء</button>
+      <button type="submit" form="plan-form" class="btn btn-primary" [disabled]="planForm().submitting()">حفظ</button>
+    </div>
+  </tamam-modal>
+}

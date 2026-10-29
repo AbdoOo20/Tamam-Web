@@ -10,25 +10,25 @@ import {
   required,
 } from '@angular/forms/signals';
 import { Router, RouterLink } from '@angular/router';
-import { homeRouteFor, isApiError, UserService, UserStore } from '@tamam/core';
+import { errorText, homeRouteFor, UserService, UserStore } from '@tamam/core';
+import { Field } from '@tamam/shared';
 import { firstValueFrom } from 'rxjs';
+
+import { AuthShell } from '../../components/auth-shell/auth-shell';
 
 import { CountriesService } from '../../services/countries.service';
 
 @Component({
   selector: 'tamam-register-page',
-  imports: [FormRoot, FormField, RouterLink],
+  imports: [FormRoot, FormField, RouterLink, Field, AuthShell],
   templateUrl: './register-page.html',
-  styleUrl: '../auth-form.scss',
 })
 export class RegisterPage {
   private readonly userService = inject(UserService);
   private readonly userStore = inject(UserStore);
   private readonly router = inject(Router);
-
   protected readonly countries = toSignal(inject(CountriesService).getAll(), { initialValue: [] });
   protected readonly serverError = signal<string | null>(null);
-
   private readonly model = signal({
     businessName: '',
     ownerName: '',
@@ -37,7 +37,6 @@ export class RegisterPage {
     email: '',
     password: '',
   });
-
   protected readonly registerForm = form(
     this.model,
     (path) => {
@@ -62,11 +61,7 @@ export class RegisterPage {
             await firstValueFrom(this.userService.register(this.model()));
             await this.router.navigateByUrl(homeRouteFor(this.userStore.role()));
           } catch (error) {
-            this.serverError.set(
-              isApiError(error)
-                ? [error.message, ...error.errors].join(' - ')
-                : 'تعذر إنشاء الحساب، حاول مرة أخرى',
-            );
+            this.serverError.set(errorText(error, 'تعذر إنشاء الحساب، حاول مرة أخرى'));
           }
         },
       },

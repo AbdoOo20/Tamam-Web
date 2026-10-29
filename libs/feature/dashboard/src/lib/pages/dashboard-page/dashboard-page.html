@@ -1,0 +1,145 @@
+<tamam-page-header title="لوحة التحكم" subtitle="صورة سريعة عن أداء طلباتك">
+  <div class="btn-group" role="group" aria-label="الفترة الزمنية">
+    @for (range of ranges; track range.days) {
+      <button
+        type="button"
+        class="btn"
+        [class.btn-primary]="store.days() === range.days"
+        [class.btn-outline-primary]="store.days() !== range.days"
+        [attr.aria-pressed]="store.days() === range.days"
+        (click)="store.setDays(range.days)"
+      >
+        {{ range.label }}
+      </button>
+    }
+  </div>
+</tamam-page-header>
+
+@if (store.loading() && !store.data()) {
+  <tamam-loading />
+} @else if (store.error(); as message) {
+  <tamam-empty-state icon="bi-wifi-off" title="تعذر التحميل" [description]="message">
+    <button type="button" class="btn btn-primary" (click)="store.load()">إعادة المحاولة</button>
+  </tamam-empty-state>
+} @else if (store.data(); as data) {
+  @if (data.totalOrders === 0) {
+    <div class="tm-card mb-4">
+      <tamam-empty-state
+        icon="bi-bag-plus"
+        title="لا توجد طلبات في هذه الفترة"
+        description="سجّل طلبًا لتظهر هنا الأرقام ونسبة التسليم والتقييمات."
+      >
+        <a routerLink="/orders/new" class="btn btn-primary">تسجيل طلب</a>
+        <a routerLink="/orders/import" class="btn btn-outline-primary">استيراد من ملف</a>
+      </tamam-empty-state>
+    </div>
+  }
+
+  <div class="row g-3 mb-4" [style.opacity]="store.loading() ? 0.6 : 1">
+    <div class="col-sm-6 col-xl-3"><tamam-stat-card label="إجمالي الطلبات" [value]="data.totalOrders" icon="bi-bag" /></div>
+    <div class="col-sm-6 col-xl-3">
+      <tamam-stat-card label="نسبة التسليم" [value]="data.deliveryRatePercent + '%'" icon="bi-bag-check" tone="success" [hint]="data.deliveredOrders + ' طلب تم تسليمه'" />
+    </div>
+    <div class="col-sm-6 col-xl-3">
+      <tamam-stat-card label="طلبات مرفوضة" [value]="data.refusedOrders" icon="bi-x-octagon" tone="danger" [hint]="data.cancelledOrders + ' ملغي · ' + data.inProgressOrders + ' قيد التنفيذ'" />
+    </div>
+    <div class="col-sm-6 col-xl-3">
+      <tamam-stat-card label="إيراد المُسلَّم" [value]="(data.deliveredRevenue | money: data.currencyCode)" icon="bi-cash-stack" tone="info" />
+    </div>
+  </div>
+
+  <div class="row g-4 mb-4">
+    <div class="col-xl-8">
+      <section class="tm-card h-100" aria-labelledby="perday">
+        <div class="tm-card-header">
+          <span id="perday">الطلبات يوميًا</span>
+          <small class="text-secondary fw-normal">{{ data.from | tamamDate: 'short' }} - {{ data.to | tamamDate: 'short' }}</small>
+        </div>
+        <div class="tm-card-body"><tamam-bar-chart [data]="data.ordersPerDay" [from]="data.from" [to]="data.to" /></div>
+      </section>
+    </div>
+    <div class="col-xl-4">
+      <section class="tm-card h-100" aria-labelledby="loss">
+        <div class="tm-card-header"><span id="loss">خسارة الرفض</span></div>
+        <div class="tm-card-body">
+          <div class="display-6 fw-bold text-danger">{{ data.totalLoss | money: data.currencyCode }}</div>
+          <p class="text-secondary mt-2 mb-0">إجمالي شحن الذهاب والمرتجع وأي خسائر أخرى للطلبات المرفوضة في هذه الفترة.</p>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <div class="row g-4 mb-4">
+    <div class="col-lg-4">
+      <section class="tm-card h-100" aria-labelledby="dist-status">
+        <div class="tm-card-header"><span id="dist-status">توزيع الحالات</span></div>
+        <div class="tm-card-body">
+          @if (statusItems().length > 0) { <tamam-meter-list [items]="statusItems()" /> } @else { <p class="text-secondary mb-0">لا بيانات.</p> }
+        </div>
+      </section>
+    </div>
+    <div class="col-lg-4">
+      <section class="tm-card h-100" aria-labelledby="dist-risk">
+        <div class="tm-card-header"><span id="dist-risk">مستوى المخاطرة</span></div>
+        <div class="tm-card-body">
+          @if (riskItems().length > 0) { <tamam-meter-list [items]="riskItems()" /> } @else { <p class="text-secondary mb-0">لا بيانات.</p> }
+        </div>
+      </section>
+    </div>
+    <div class="col-lg-4">
+      <section class="tm-card h-100" aria-labelledby="dist-fault">
+        <div class="tm-card-header"><span id="dist-fault">من المسؤول عن الرفض؟</span></div>
+        <div class="tm-card-body">
+          @if (attributionItems().length > 0) { <tamam-meter-list [items]="attributionItems()" /> } @else { <p class="text-secondary mb-0">لا توجد طلبات مرفوضة.</p> }
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <section class="tm-card" aria-labelledby="quality">
+    <div class="tm-card-header">
+      <span id="quality">جودة الشهور الأخيرة</span>
+      <small class="text-secondary fw-normal">مقارنة نسبة الرفض بسببك مع متوسط الشبكة</small>
+    </div>
+    @if (store.quality().length === 0) {
+      <tamam-empty-state icon="bi-graph-up" title="لا توجد بيانات جودة بعد" description="تظهر الأرقام بعد إتمام الطلبات (تسليم أو رفض)." />
+    } @else {
+      <div class="table-responsive">
+        <table class="table tm-table">
+          <thead>
+            <tr>
+              <th scope="col">الشهر</th>
+              <th scope="col">طلبات مكتملة</th>
+              <th scope="col">تم تسليمها</th>
+              <th scope="col">مرفوضة</th>
+              <th scope="col">بسبب العميل</th>
+              <th scope="col">بسببك</th>
+              <th scope="col">بسبب الشحن</th>
+              <th scope="col">نزاعات</th>
+              <th scope="col">نسبة خطئك</th>
+              <th scope="col">متوسط الشبكة</th>
+              <th scope="col">الخسارة</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (month of store.quality(); track month.year * 100 + month.month) {
+              <tr>
+                <td class="fw-semibold text-nowrap">{{ monthDate(month.year, month.month) | tamamDate: 'month' }}</td>
+                <td>{{ month.finalizedOrders }}</td>
+                <td>{{ month.delivered }}</td>
+                <td>{{ month.refused }}</td>
+                <td>{{ month.refusedCustomerFault }}</td>
+                <td>{{ month.refusedMerchantFault }}</td>
+                <td>{{ month.refusedCarrierFault }}</td>
+                <td>{{ month.disputed }}</td>
+                <td [class.text-danger]="month.merchantFaultRatePercent > month.networkMerchantFaultRatePercent" class="fw-semibold">{{ month.merchantFaultRatePercent }}%</td>
+                <td class="text-secondary">{{ month.networkMerchantFaultRatePercent }}%</td>
+                <td class="text-nowrap">{{ month.totalLoss | money: data.currencyCode }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </section>
+}

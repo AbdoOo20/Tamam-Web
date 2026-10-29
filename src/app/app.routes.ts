@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { authGuard, guestGuard, homeGuard, roleGuard, RoleNames } from '@tamam/core';
+import { authGuard, guestGuard, roleGuard, RoleNames } from '@tamam/core';
 
 import { MainLayout } from './layout/main-layout/main-layout';
 
@@ -8,6 +8,13 @@ import { MainLayout } from './layout/main-layout/main-layout';
  * Guards live here, so a feature never decides who can reach it.
  */
 export const routes: Routes = [
+  {
+    // The marketing landing page. Signed-in users are sent to their home page by the guard.
+    path: '',
+    pathMatch: 'full',
+    canActivate: [guestGuard],
+    loadChildren: () => import('@tamam/landing').then((m) => m.LANDING_ROUTES),
+  },
   {
     path: 'auth',
     canActivate: [guestGuard],
@@ -23,7 +30,6 @@ export const routes: Routes = [
     component: MainLayout,
     canActivate: [authGuard],
     children: [
-      { path: '', pathMatch: 'full', canActivate: [homeGuard], children: [] },
       {
         path: 'dashboard',
         title: 'لوحة التحكم',

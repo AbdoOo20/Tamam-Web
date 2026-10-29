@@ -1,0 +1,55 @@
+<section class="tm-card" aria-labelledby="risk-title">
+  <div class="tm-card-header">
+    <span id="risk-title">تقييم المخاطر</span>
+    <button type="button" class="btn btn-sm btn-light" [disabled]="busy()" (click)="recalculate()">
+      <i class="bi bi-arrow-repeat" aria-hidden="true"></i> إعادة التقييم
+    </button>
+  </div>
+
+  @if (risk(); as r) {
+    <div class="tm-card-body">
+      <div class="d-flex align-items-center gap-3 mb-3">
+        <div class="ring" [class]="levelClass()" [style.--score]="r.score" role="img" [attr.aria-label]="'الدرجة ' + r.score + ' من 100'">
+          <span><strong>{{ r.score }}</strong></span>
+        </div>
+        <div>
+          <tamam-risk-badge [level]="r.level" />
+          <div class="fw-semibold mt-1">{{ actionLabel() }}</div>
+          @if (r.isShadow) {
+            <small class="text-secondary">وضع تجريبي: التقييم لا يؤثر على عملك</small>
+          }
+        </div>
+      </div>
+
+      @if (r.signals.length > 0) {
+        <ul class="list-unstyled mb-3">
+          @for (signal of r.signals; track signal.ruleId) {
+            <li class="d-flex justify-content-between gap-3 py-2 border-bottom">
+              <span>{{ signal.explanationAr }}</span>
+              <b class="ltr text-nowrap" [class.text-danger]="signal.points > 0" [class.text-success]="signal.points < 0">
+                {{ signal.points > 0 ? '+' : '' }}{{ signal.points }}
+              </b>
+            </li>
+          }
+        </ul>
+      } @else {
+        <p class="text-secondary">لا توجد إشارات مخاطرة على هذا الطلب.</p>
+      }
+
+      @if (decisionLabel(); as label) {
+        <div class="alert alert-light border mb-0"><i class="bi bi-person-check" aria-hidden="true"></i> قرارك: <strong>{{ label }}</strong></div>
+      } @else if (!r.isShadow) {
+        <div class="fw-semibold mb-2">ماذا ستفعل بهذه التوصية؟</div>
+        <div class="d-flex flex-wrap gap-2">
+          @for (decision of decisions; track decision.value) {
+            <button type="button" class="btn btn-outline-primary btn-sm" [disabled]="busy()" (click)="decide(decision.value)">
+              <i class="bi" [class]="decision.icon" aria-hidden="true"></i> {{ decision.label }}
+            </button>
+          }
+        </div>
+      }
+    </div>
+  } @else {
+    <div class="tm-card-body text-secondary">لم يُحسب تقييم لهذا الطلب بعد.</div>
+  }
+</section>

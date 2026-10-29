@@ -1,0 +1,81 @@
+<div class="d-flex flex-wrap gap-2 mb-3">
+  <div style="min-width: 16rem; max-width: 24rem; flex: 1">
+    <tamam-search-box placeholder="ابحث باسم النشاط أو الهاتف أو البريد" [value]="search()" (searched)="setSearch($event)" />
+  </div>
+  <select class="form-select w-auto" aria-label="حالة التاجر" (change)="setStatus($event)">
+    <option value="">كل الحالات</option>
+    @for (option of statusOptions; track option.id) {
+      <option [value]="option.id">{{ option.label }}</option>
+    }
+  </select>
+</div>
+
+@if (loading() && items().length === 0) {
+  <tamam-loading variant="skeleton" [rows]="6" />
+} @else if (error(); as message) {
+  <tamam-empty-state icon="bi-wifi-off" title="تعذر التحميل" [description]="message">
+    <button type="button" class="btn btn-primary" (click)="load()">إعادة المحاولة</button>
+  </tamam-empty-state>
+} @else if (items().length === 0) {
+  <tamam-empty-state icon="bi-shop" title="لا يوجد تجار مطابقون" />
+} @else {
+  <div class="table-responsive">
+    <table class="table tm-table">
+      <thead>
+        <tr><th scope="col">النشاط</th><th scope="col">المالك</th><th scope="col">الحالة</th><th scope="col">الطلبات</th><th scope="col">التسجيل</th><th scope="col"><span class="visually-hidden">إجراءات</span></th></tr>
+      </thead>
+      <tbody>
+        @for (merchant of items(); track merchant.id) {
+          <tr>
+            <td class="fw-semibold" style="max-width: 14rem">
+              <span tamamTooltip>{{ merchant.businessName }}</span>
+              @if (merchant.shadowMode) { <tamam-badge tone="info">تجريبي</tamam-badge> }
+            </td>
+            <td style="max-width: 14rem">{{ merchant.ownerName }}<small class="d-block text-secondary ltr" tamamTooltip>{{ merchant.email || merchant.phone }}</small></td>
+            <td><tamam-meta-badge kind="merchant" [value]="merchant.status" /></td>
+            <td>{{ merchant.ordersCount }}</td>
+            <td class="text-nowrap">{{ merchant.createdAt | tamamDate }}</td>
+            <td class="text-end"><button type="button" class="btn btn-sm btn-light" (click)="open(merchant)">التفاصيل</button></td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <tamam-pagination [page]="page()" [totalPages]="totalPages()" [totalCount]="totalCount()" (pageChange)="goTo($event)" />
+}
+
+@if (selected(); as detail) {
+  <tamam-modal [title]="detail.businessName" size="lg" (closed)="selected.set(null)">
+    <div class="row g-3 mb-3">
+      <div class="col-sm-6"><div class="text-secondary small">المالك</div>{{ detail.ownerName }}</div>
+      <div class="col-sm-6"><div class="text-secondary small">الهاتف</div><span class="ltr">{{ detail.phone }}</span></div>
+      <div class="col-sm-6"><div class="text-secondary small">البريد</div><span class="ltr">{{ detail.email || '—' }}</span></div>
+      <div class="col-sm-6"><div class="text-secondary small">الحالة</div><tamam-meta-badge kind="merchant" [value]="detail.status" /></div>
+      <div class="col-sm-4"><div class="text-secondary small">المستخدمون</div>{{ detail.usersCount }}</div>
+      <div class="col-sm-4"><div class="text-secondary small">كل الطلبات</div>{{ detail.ordersCount }}</div>
+      <div class="col-sm-4"><div class="text-secondary small">آخر 30 يومًا</div>{{ detail.ordersLast30Days }} ({{ detail.refusedLast30Days }} مرفوض)</div>
+      <div class="col-sm-6"><div class="text-secondary small">مفتاح API</div>{{ detail.hasApiKey ? 'مفعّل' : 'غير موجود' }}</div>
+      <div class="col-sm-6">
+        <label class="text-secondary small d-block" for="merchant-plan">الباقة</label>
+        <select id="merchant-plan" class="form-select form-select-sm" (change)="changePlan(detail, $event)">
+          @if (!detail.planCode) {
+            <option value="">بدون باقة</option>
+          }
+          @for (plan of plans(); track plan.id) {
+            <option [value]="plan.code" [selected]="plan.code === detail.planCode">{{ plan.nameAr }}</option>
+          }
+        </select>
+      </div>
+    </div>
+
+    <div modal-footer class="d-flex flex-wrap gap-2">
+      @if (detail.status === Status.Suspended || detail.status === Status.Closed) {
+        <button type="button" class="btn btn-primary" (click)="changeStatus(detail, Status.Active)">إعادة التفعيل</button>
+      } @else {
+        <button type="button" class="btn btn-outline-warning" (click)="changeStatus(detail, Status.Suspended)">إيقاف</button>
+        <button type="button" class="btn btn-outline-danger" (click)="changeStatus(detail, Status.Closed)">إغلاق الحساب</button>
+      }
+    </div>
+  </tamam-modal>
+}

@@ -1,23 +1,21 @@
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { EmptyState, Logo } from '@tamam/shared';
 
 @Component({
   selector: 'app-not-found',
-  imports: [RouterLink],
+  imports: [RouterLink, EmptyState, Logo],
   template: `
-    <section class="not-found">
-      <h1>الصفحة غير موجودة</h1>
-      <a routerLink="/">العودة للرئيسية</a>
-    </section>
-  `,
-  styles: `
-    .not-found {
-      display: grid;
-      place-items: center;
-      gap: 1rem;
-      min-block-size: 100dvh;
-      align-content: center;
-    }
+    <div class="min-vh-100 d-flex flex-column align-items-center justify-content-center gap-3 p-3">
+      <a routerLink="/" aria-label="تمام"><tamam-logo /></a>
+      <tamam-empty-state
+        icon="bi-compass"
+        title="الصفحة غير موجودة"
+        description="الرابط الذي فتحته غير صحيح أو تم نقله."
+      >
+        <a routerLink="/" class="btn btn-primary">العودة للرئيسية</a>
+      </tamam-empty-state>
+    </div>
   `,
 })
 export class NotFound {}

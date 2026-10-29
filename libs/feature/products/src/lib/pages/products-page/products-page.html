@@ -1,0 +1,91 @@
+<tamam-page-header title="المنتجات" subtitle="كتالوج منتجاتك لتسريع إضافة الطلبات">
+  <button type="button" class="btn btn-primary" (click)="editing.set(null)">
+    <i class="bi bi-plus-lg" aria-hidden="true"></i> إضافة منتج
+  </button>
+</tamam-page-header>
+
+<div class="tm-card">
+  <div class="tm-card-header flex-wrap">
+    <div class="d-flex flex-wrap gap-2 flex-grow-1">
+      <div style="min-width: 16rem; max-width: 24rem; flex: 1">
+        <tamam-search-box placeholder="ابحث بالاسم أو الكود" [value]="store.search()" (searched)="store.setSearch($event)" />
+      </div>
+      <select class="form-select w-auto" aria-label="تصفية بالحالة" (change)="onFilter($event)">
+        <option value="all">كل الحالات</option>
+        <option value="active">النشطة</option>
+        <option value="inactive">المتوقفة</option>
+      </select>
+    </div>
+  </div>
+
+  @if (store.loading() && store.items().length === 0) {
+    <div class="p-4"><tamam-loading variant="skeleton" [rows]="6" /></div>
+  } @else if (store.error(); as message) {
+    <tamam-empty-state icon="bi-wifi-off" title="تعذر التحميل" [description]="message">
+      <button type="button" class="btn btn-primary" (click)="store.load()">إعادة المحاولة</button>
+    </tamam-empty-state>
+  } @else if (store.items().length === 0) {
+    <tamam-empty-state
+      icon="bi-box-seam"
+      [title]="store.search() || store.activeFilter() !== 'all' ? 'لا توجد نتائج' : 'لا توجد منتجات'"
+      [description]="store.search() ? 'جرّب كلمة بحث مختلفة.' : 'أضف منتجاتك لتختارها بسرعة عند تسجيل الطلبات.'"
+    >
+      @if (!store.search()) {
+        <button type="button" class="btn btn-primary" (click)="editing.set(null)">إضافة منتج</button>
+      }
+    </tamam-empty-state>
+  } @else {
+    <div class="table-responsive">
+      <table class="table tm-table">
+        <thead>
+          <tr>
+            <th scope="col">المنتج</th>
+            <th scope="col">الكود</th>
+            <th scope="col">السعر</th>
+            <th scope="col">الإعلان</th>
+            <th scope="col">الحالة</th>
+            <th scope="col"><span class="visually-hidden">إجراءات</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (product of store.items(); track product.id) {
+            <tr>
+              <td class="fw-semibold" style="max-width: 18rem"><span tamamTooltip>{{ product.name }}</span></td>
+              <td class="ltr text-secondary">{{ product.sku || '—' }}</td>
+              <td>{{ product.defaultPrice | money }}</td>
+              <td style="max-width: 14rem">
+                @if (product.adUrl) {
+                  <a class="ltr" [href]="product.adUrl" target="_blank" rel="noopener noreferrer" tamamTooltip>{{ product.adUrl }}</a>
+                } @else {
+                  —
+                }
+              </td>
+              <td>
+                <tamam-badge [tone]="product.isActive ? 'success' : 'secondary'">{{ product.isActive ? 'نشط' : 'متوقف' }}</tamam-badge>
+              </td>
+              <td class="text-end text-nowrap">
+                <button type="button" class="btn btn-sm btn-light" [attr.aria-label]="'تعديل ' + product.name" (click)="editing.set(product)">
+                  <i class="bi bi-pencil" aria-hidden="true"></i>
+                </button>
+                <button type="button" class="btn btn-sm btn-light text-danger" [attr.aria-label]="'حذف ' + product.name" (click)="remove(product)">
+                  <i class="bi bi-trash" aria-hidden="true"></i>
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <tamam-pagination
+      [page]="store.page()"
+      [totalPages]="store.totalPages()"
+      [totalCount]="store.totalCount()"
+      (pageChange)="store.setPage($event)"
+    />
+  }
+</div>
+
+@if (editing() !== undefined) {
+  <tamam-product-form [product]="editing() ?? null" (saved)="onSaved()" (closed)="editing.set(undefined)" />
+}

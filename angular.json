@@ -29,20 +29,30 @@
                 "input": "public"
               }
             ],
-            "styles": ["src/styles.scss"]
+            "styles": [
+              "node_modules/bootstrap/dist/css/bootstrap.rtl.min.css",
+              "node_modules/bootstrap-icons/font/bootstrap-icons.min.css",
+              "node_modules/@fontsource/cairo/arabic-400.css",
+              "node_modules/@fontsource/cairo/arabic-600.css",
+              "node_modules/@fontsource/cairo/arabic-700.css",
+              "node_modules/@fontsource/cairo/latin-400.css",
+              "node_modules/@fontsource/cairo/latin-600.css",
+              "node_modules/@fontsource/cairo/latin-700.css",
+              "src/styles.scss"
+            ]
           },
           "configurations": {
             "production": {
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "500kB",
-                  "maximumError": "1MB"
+                  "maximumWarning": "900kB",
+                  "maximumError": "1.5MB"
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "4kB",
-                  "maximumError": "8kB"
+                  "maximumWarning": "12kB",
+                  "maximumError": "24kB"
                 }
               ],
               "outputHashing": "all"

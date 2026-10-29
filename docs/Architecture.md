@@ -7,7 +7,7 @@ libs/                         every library lives outside src/
   core/                       @tamam/core    – cross-cutting code every feature may use
   shared/                     @tamam/shared  – reusable UI (components, pipes, directives)
   feature/
-    auth/  dashboard/  orders/  customers/  carriers/  products/
+    landing/  auth/  dashboard/  orders/  customers/  carriers/  products/
     billing/  notifications/  merchant/  admin/  public-links/
 src/
   app/                        the shell only: routes, layout, config
@@ -77,3 +77,33 @@ running inside the page (XSS). Use a different `storageSecret` per environment.
 
 `src/environments/environment.ts` is production; `ng serve` swaps in `environment.development.ts`.
 Libraries never import these files: the values are injected through `APP_ENVIRONMENT`.
+
+## Shared UI (`@tamam/shared`)
+
+Built on Bootstrap 5.3 RTL (CSS only, no Bootstrap JS) and bootstrap-icons; brand tokens are in `src/styles.scss`.
+
+| Piece | Use |
+|---|---|
+| `tamam-empty-state`, `tamam-loading` (spinner / skeleton / inline) | every list and page needs both |
+| `tamam-page-header`, `tamam-pagination`, `tamam-search-box`, `tamam-stat-card`, `tamam-meter-list` | page building blocks |
+| `tamam-modal`, `ConfirmService` + `tamam-confirm-host` | dialogs on native `<dialog>` |
+| `tamam-field` | label + error + hint wrapper for Signal Forms controls |
+| `tamam-badge`, order status / risk badges | colored labels |
+| `[tamamTooltip]` | truncates long text and shows a tooltip only when it is cut |
+| `money`, `tamamDate` pipes | Latin digits, Arabic labels |
+
+## Local run
+
+Backend `https://localhost:7265` needs `Cors:AllowedOrigins` containing `http://localhost:4200` (see `appsettings.Example.json`).
+Then `npm install` and `npx ng serve`.
+
+## Real-time notifications
+
+`NotificationsRealtime` (in `libs/feature/notifications`) opens a SignalR connection to `<api host>/hubs/notifications` while the bell is on screen,
+using the session token. Pushed notifications go to `NotificationsStore.receive()`; the 5-minute poll in the bell is only a safety net.
+
+## Brand
+
+The logo is a chat bubble holding the letter ت with a check-shaped tail (`<tamam-logo on="light|dark|brand" />` in `@tamam/shared`).
+The bubble is green on light and navy backgrounds and navy on a green background. Static files: `public/favicon.svg`, `favicon.ico`, `apple-touch-icon.png`, `icon-192.png`, `icon-512.png`, `logo-mark.svg`, `site.webmanifest`.
+`AppTitleStrategy` sets the tab title to `<page title> | تمام`.

@@ -1,31 +1,27 @@
-<form [formRoot]="loginForm">
-  <h1>تسجيل الدخول</h1>
-
-  @if (serverError(); as message) {
-    <p class="alert" role="alert">{{ message }}</p>
-  }
-
-  <label>
-    البريد الإلكتروني
-    <input type="email" autocomplete="email" [formField]="loginForm.email" />
-    @if (loginForm.email().touched()) {
-      @for (error of loginForm.email().errors(); track error.kind) {
-        <span class="error">{{ error.message }}</span>
-      }
+<tamam-auth-shell title="تسجيل الدخول" subtitle="أهلًا بعودتك، أدخل بياناتك للمتابعة">
+  <form [formRoot]="loginForm" novalidate>
+    @if (serverError(); as message) {
+      <div class="alert alert-danger d-flex gap-2" role="alert">
+        <i class="bi bi-exclamation-octagon-fill" aria-hidden="true"></i>
+        <span>{{ message }}</span>
+      </div>
     }
-  </label>
 
-  <label>
-    كلمة المرور
-    <input type="password" autocomplete="current-password" [formField]="loginForm.password" />
-    @if (loginForm.password().touched()) {
-      @for (error of loginForm.password().errors(); track error.kind) {
-        <span class="error">{{ error.message }}</span>
+    <tamam-field label="البريد الإلكتروني" [field]="loginForm.email">
+      <input type="email" class="form-control form-control-lg" autocomplete="email" [formField]="loginForm.email" />
+    </tamam-field>
+
+    <tamam-field label="كلمة المرور" [field]="loginForm.password">
+      <input type="password" class="form-control form-control-lg" autocomplete="current-password" [formField]="loginForm.password" />
+    </tamam-field>
+
+    <button type="submit" class="btn btn-primary btn-lg w-100" [disabled]="loginForm().submitting()">
+      @if (loginForm().submitting()) {
+        <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
       }
-    }
-  </label>
+      دخول
+    </button>
 
-  <button type="submit" [disabled]="loginForm().submitting()">دخول</button>
-
-  <p>ليس لديك حساب؟ <a routerLink="/auth/register">أنشئ حسابًا</a></p>
-</form>
+    <p class="text-center mt-4 mb-0">ليس لديك حساب؟ <a routerLink="/auth/register" class="fw-bold">أنشئ حسابًا مجانيًا</a></p>
+  </form>
+</tamam-auth-shell>

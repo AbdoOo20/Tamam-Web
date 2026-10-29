@@ -1,0 +1,72 @@
+<tamam-page-header title="شركات الشحن" subtitle="الشركات التي تسلّم بها طلباتك">
+  <button type="button" class="btn btn-primary" (click)="editing.set(null)">
+    <i class="bi bi-plus-lg" aria-hidden="true"></i> إضافة شركة
+  </button>
+</tamam-page-header>
+
+<div class="tm-card">
+  @if (store.loading() && store.items().length === 0) {
+    <div class="p-4"><tamam-loading variant="skeleton" [rows]="5" /></div>
+  } @else if (store.error(); as message) {
+    <tamam-empty-state icon="bi-wifi-off" title="تعذر التحميل" [description]="message">
+      <button type="button" class="btn btn-primary" (click)="store.load()">إعادة المحاولة</button>
+    </tamam-empty-state>
+  } @else if (store.items().length === 0) {
+    <tamam-empty-state
+      icon="bi-truck"
+      title="لا توجد شركات شحن"
+      description="أضف شركة الشحن التي تتعامل معها لتربطها بالطلبات."
+    >
+      <button type="button" class="btn btn-primary" (click)="editing.set(null)">إضافة أول شركة</button>
+    </tamam-empty-state>
+  } @else {
+    <div class="table-responsive">
+      <table class="table tm-table">
+        <thead>
+          <tr>
+            <th scope="col">الشركة</th>
+            <th scope="col">الهاتف</th>
+            <th scope="col">رابط التتبع</th>
+            <th scope="col">الحالة</th>
+            <th scope="col"><span class="visually-hidden">إجراءات</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (carrier of store.items(); track carrier.id) {
+            <tr>
+              <td class="fw-semibold" style="max-width: 14rem">
+                <span tamamTooltip>{{ carrier.name }}</span>
+                @if (carrier.isGlobal) {
+                  <tamam-badge tone="info">عامة</tamam-badge>
+                }
+              </td>
+              <td class="ltr">{{ carrier.phone || '—' }}</td>
+              <td style="max-width: 18rem">
+                <span class="ltr text-secondary" tamamTooltip>{{ carrier.trackingUrlTemplate || '—' }}</span>
+              </td>
+              <td>
+                <tamam-badge [tone]="carrier.isActive ? 'success' : 'secondary'">
+                  {{ carrier.isActive ? 'نشطة' : 'متوقفة' }}
+                </tamam-badge>
+              </td>
+              <td class="text-end text-nowrap">
+                @if (!carrier.isGlobal) {
+                  <button type="button" class="btn btn-sm btn-light" [attr.aria-label]="'تعديل ' + carrier.name" (click)="editing.set(carrier)">
+                    <i class="bi bi-pencil" aria-hidden="true"></i>
+                  </button>
+                  <button type="button" class="btn btn-sm btn-light text-danger" [attr.aria-label]="'حذف ' + carrier.name" (click)="remove(carrier)">
+                    <i class="bi bi-trash" aria-hidden="true"></i>
+                  </button>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>
+
+@if (editing() !== undefined) {
+  <tamam-carrier-form [carrier]="editing() ?? null" (saved)="onSaved()" (closed)="editing.set(undefined)" />
+}

@@ -1,0 +1,97 @@
+<section class="tm-card" aria-labelledby="items-title">
+  <div class="tm-card-header">
+    <span id="items-title">المنتجات</span>
+    @if (canEdit()) {
+      <button type="button" class="btn btn-sm btn-light" (click)="edit()"><i class="bi bi-pencil" aria-hidden="true"></i> تعديل</button>
+    }
+  </div>
+
+  <div class="table-responsive">
+    <table class="table tm-table">
+      <thead>
+        <tr>
+          <th scope="col">المنتج</th>
+          <th scope="col">الكمية</th>
+          <th scope="col">السعر</th>
+          <th scope="col">الإجمالي</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (item of order().items; track item.id) {
+          <tr>
+            <td style="max-width: 16rem">
+              <span class="fw-semibold" tamamTooltip>{{ item.productName }}</span>
+              @if (item.variant) {
+                <small class="text-secondary d-block" tamamTooltip>{{ item.variant }}</small>
+              }
+            </td>
+            <td>{{ item.quantity }}</td>
+            <td>{{ item.unitPrice | money: order().currencyCode }}</td>
+            <td class="fw-semibold">{{ item.lineTotal | money: order().currencyCode }}</td>
+          </tr>
+        }
+      </tbody>
+      <tfoot>
+        <tr><td colspan="3" class="text-secondary">إجمالي المنتجات</td><td>{{ order().itemsTotal | money: order().currencyCode }}</td></tr>
+        <tr><td colspan="3" class="text-secondary">الشحن</td><td>{{ order().shippingFee | money: order().currencyCode }}</td></tr>
+        @if (order().discountAmount > 0) {
+          <tr><td colspan="3" class="text-secondary">الخصم</td><td>- {{ order().discountAmount | money: order().currencyCode }}</td></tr>
+        }
+        <tr><td colspan="3" class="fw-bold">الإجمالي</td><td class="fw-bold">{{ order().totalAmount | money: order().currencyCode }}</td></tr>
+        @if (order().depositAmount > 0) {
+          <tr><td colspan="3" class="text-secondary">العربون المدفوع</td><td>- {{ order().depositAmount | money: order().currencyCode }}</td></tr>
+        }
+        <tr class="table-light"><td colspan="3" class="fw-bold">المطلوب تحصيله</td><td class="fw-bold text-primary">{{ order().amountToCollect | money: order().currencyCode }}</td></tr>
+      </tfoot>
+    </table>
+  </div>
+</section>
+
+@if (editing()) {
+  <tamam-modal title="تعديل منتجات الطلب" size="lg" (closed)="editing.set(false)">
+    <form [formRoot]="itemsForm" id="items-form" novalidate>
+      @if (serverError(); as message) {
+        <div class="alert alert-danger" role="alert">{{ message }}</div>
+      }
+
+      @for (item of itemsForm.items; track $index; let i = $index) {
+        <div class="border rounded-3 p-3 mb-3">
+          <div class="row">
+            <div class="col-md-6">
+              <tamam-field label="اسم المنتج" [field]="item.productName" [required]="true">
+                <input type="text" class="form-control" [formField]="item.productName" />
+              </tamam-field>
+            </div>
+            <div class="col-md-6">
+              <tamam-field label="المقاس / اللون" [field]="item.variant">
+                <input type="text" class="form-control" [formField]="item.variant" />
+              </tamam-field>
+            </div>
+            <div class="col-5 col-md-4">
+              <tamam-field label="الكمية" [field]="item.quantity">
+                <input type="number" class="form-control" [formField]="item.quantity" />
+              </tamam-field>
+            </div>
+            <div class="col-7 col-md-5">
+              <tamam-field label="سعر الوحدة" [field]="item.unitPrice">
+                <input type="number" class="form-control" step="0.01" [formField]="item.unitPrice" />
+              </tamam-field>
+            </div>
+            <div class="col-12 col-md-3 d-flex align-items-end justify-content-end mb-3">
+              <button type="button" class="btn btn-sm btn-light text-danger" [attr.aria-label]="'حذف المنتج ' + (i + 1)" (click)="removeItem(i)">
+                <i class="bi bi-trash" aria-hidden="true"></i> حذف
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+
+      <button type="button" class="btn btn-outline-primary btn-sm" (click)="addItem()"><i class="bi bi-plus-lg" aria-hidden="true"></i> إضافة منتج</button>
+    </form>
+
+    <div modal-footer class="d-flex gap-2">
+      <button type="button" class="btn btn-light" (click)="editing.set(false)">إلغاء</button>
+      <button type="submit" form="items-form" class="btn btn-primary" [disabled]="itemsForm().submitting()">حفظ</button>
+    </div>
+  </tamam-modal>
+}

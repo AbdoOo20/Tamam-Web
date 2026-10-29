@@ -1,0 +1,54 @@
+<p class="text-secondary">قواعد تقييم المخاطر. تغيير النقاط يؤثر على الطلبات الجديدة وإعادة التقييم فقط.</p>
+
+@if (loading()) {
+  <tamam-loading variant="skeleton" [rows]="5" />
+} @else if (rules().length === 0) {
+  <tamam-empty-state icon="bi-sliders" title="لا توجد قواعد" />
+} @else {
+  <div class="table-responsive">
+    <table class="table tm-table">
+      <thead>
+        <tr><th scope="col">القاعدة</th><th scope="col">الشرح الظاهر للتاجر</th><th scope="col">النقاط</th><th scope="col">النطاق</th><th scope="col">الحالة</th><th scope="col"><span class="visually-hidden">إجراءات</span></th></tr>
+      </thead>
+      <tbody>
+        @for (rule of rules(); track rule.id) {
+          <tr>
+            <td style="max-width: 14rem"><span class="fw-semibold" tamamTooltip>{{ rule.nameAr }}</span><small class="d-block text-secondary ltr">{{ rule.code }} · v{{ rule.version }}</small></td>
+            <td style="max-width: 22rem"><span tamamTooltip [tooltipLines]="2">{{ rule.explanationTemplateAr }}</span></td>
+            <td class="fw-bold ltr">{{ rule.points > 0 ? '+' : '' }}{{ rule.points }}</td>
+            <td>{{ rule.scope }}</td>
+            <td><tamam-badge [tone]="rule.isActive ? 'success' : 'secondary'">{{ rule.isActive ? 'فعّالة' : 'متوقفة' }}</tamam-badge></td>
+            <td class="text-end"><button type="button" class="btn btn-sm btn-light" [attr.aria-label]="'تعديل ' + rule.nameAr" (click)="open(rule)"><i class="bi bi-pencil" aria-hidden="true"></i></button></td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}
+
+@if (editing()) {
+  <tamam-modal title="تعديل قاعدة مخاطرة" (closed)="editing.set(null)">
+    <form [formRoot]="ruleForm" id="rule-form" novalidate>
+      @if (serverError(); as message) {
+        <div class="alert alert-danger" role="alert">{{ message }}</div>
+      }
+      <tamam-field label="الاسم" [field]="ruleForm.nameAr" [required]="true">
+        <input type="text" class="form-control" [formField]="ruleForm.nameAr" />
+      </tamam-field>
+      <tamam-field label="نص الشرح" [field]="ruleForm.explanationTemplateAr" [required]="true" hint="يظهر للتاجر بجانب كل إشارة في تقييم الطلب">
+        <textarea class="form-control" rows="3" [formField]="ruleForm.explanationTemplateAr"></textarea>
+      </tamam-field>
+      <tamam-field label="النقاط" [field]="ruleForm.points">
+        <input type="number" class="form-control" [formField]="ruleForm.points" />
+      </tamam-field>
+      <div class="form-check form-switch">
+        <input class="form-check-input" type="checkbox" role="switch" id="rule-active" [formField]="ruleForm.isActive" />
+        <label class="form-check-label" for="rule-active">قاعدة فعّالة</label>
+      </div>
+    </form>
+    <div modal-footer class="d-flex gap-2">
+      <button type="button" class="btn btn-light" (click)="editing.set(null)">إلغاء</button>
+      <button type="submit" form="rule-form" class="btn btn-primary" [disabled]="ruleForm().submitting()">حفظ</button>
+    </div>
+  </tamam-modal>
+}

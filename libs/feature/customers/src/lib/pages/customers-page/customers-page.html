@@ -1,0 +1,91 @@
+<tamam-page-header title="العملاء" subtitle="سجل كل عميل طلب منك وموثوقيته" />
+
+<div class="tm-card">
+  <div class="tm-card-header">
+    <div style="min-width: 16rem; max-width: 26rem; flex: 1">
+      <tamam-search-box placeholder="ابحث بالاسم أو رقم الهاتف" [value]="store.search()" (searched)="store.setSearch($event)" />
+    </div>
+  </div>
+
+  @if (store.loading() && store.items().length === 0) {
+    <div class="p-4"><tamam-loading variant="skeleton" [rows]="6" /></div>
+  } @else if (store.error(); as message) {
+    <tamam-empty-state icon="bi-wifi-off" title="تعذر التحميل" [description]="message">
+      <button type="button" class="btn btn-primary" (click)="store.load()">إعادة المحاولة</button>
+    </tamam-empty-state>
+  } @else if (store.items().length === 0) {
+    <tamam-empty-state
+      icon="bi-people"
+      [title]="store.search() ? 'لا توجد نتائج' : 'لا يوجد عملاء بعد'"
+      [description]="store.search() ? 'جرّب اسمًا أو رقمًا مختلفًا.' : 'يُضاف العميل تلقائيًا عند تسجيل أول طلب له.'"
+    >
+      @if (!store.search()) {
+        <a routerLink="/orders/new" class="btn btn-primary">تسجيل طلب</a>
+      }
+    </tamam-empty-state>
+  } @else {
+    <div class="table-responsive">
+      <table class="table tm-table">
+        <thead>
+          <tr>
+            <th scope="col">العميل</th>
+            <th scope="col">الهاتف</th>
+            <th scope="col">الطلبات</th>
+            <th scope="col">تم تسليمها</th>
+            <th scope="col">نسبة الرفض</th>
+            <th scope="col">موثوقية الشبكة</th>
+            <th scope="col">آخر طلب</th>
+            <th scope="col"><span class="visually-hidden">إجراءات</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (customer of store.items(); track customer.id) {
+            <tr>
+              <td class="fw-semibold" style="max-width: 14rem">
+                <span tamamTooltip>{{ customer.fullName }}</span>
+                @if (customer.notes) {
+                  <small class="text-secondary d-block" tamamTooltip>{{ customer.notes }}</small>
+                }
+              </td>
+              <td class="ltr">{{ customer.phoneE164 }}</td>
+              <td>{{ customer.totalOrders }}</td>
+              <td>{{ customer.deliveredOrders }}</td>
+              <td>
+                <span [class.text-danger]="customer.refusedOrders > 0" [class.fw-bold]="customer.refusedOrders > 0">
+                  {{ refusalRate(customer) }}
+                </span>
+                @if (customer.refusedOrders > 0) {
+                  <small class="text-secondary">({{ customer.refusedOrders }})</small>
+                }
+              </td>
+              <td>
+                @if (customer.networkReliabilityScore !== null) {
+                  <tamam-badge [tone]="reliabilityTone(customer.networkReliabilityScore)">{{ customer.networkReliabilityScore }}/100</tamam-badge>
+                } @else {
+                  <span class="text-secondary small">لا يوجد سجل</span>
+                }
+              </td>
+              <td class="text-nowrap">{{ customer.lastOrderAt | tamamDate }}</td>
+              <td class="text-end">
+                <button type="button" class="btn btn-sm btn-light" [attr.aria-label]="'تعديل ' + customer.fullName" (click)="editing.set(customer)">
+                  <i class="bi bi-pencil" aria-hidden="true"></i>
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <tamam-pagination
+      [page]="store.page()"
+      [totalPages]="store.totalPages()"
+      [totalCount]="store.totalCount()"
+      (pageChange)="store.setPage($event)"
+    />
+  }
+</div>
+
+@if (editing(); as customer) {
+  <tamam-customer-form [customer]="customer" (saved)="onSaved()" (closed)="editing.set(null)" />
+}

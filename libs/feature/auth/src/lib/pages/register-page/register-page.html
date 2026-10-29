@@ -1,76 +1,58 @@
-<form [formRoot]="registerForm">
-  <h1>إنشاء حساب</h1>
-
-  @if (serverError(); as message) {
-    <p class="alert" role="alert">{{ message }}</p>
-  }
-
-  <label>
-    اسم النشاط
-    <input type="text" autocomplete="organization" [formField]="registerForm.businessName" />
-    @if (registerForm.businessName().touched()) {
-      @for (error of registerForm.businessName().errors(); track error.kind) {
-        <span class="error">{{ error.message }}</span>
-      }
+<tamam-auth-shell title="أنشئ حساب متجرك" subtitle="ابدأ تجربة مجانية لمدة 14 يومًا">
+  <form [formRoot]="registerForm" novalidate>
+    @if (serverError(); as message) {
+      <div class="alert alert-danger d-flex gap-2" role="alert">
+        <i class="bi bi-exclamation-octagon-fill" aria-hidden="true"></i>
+        <span>{{ message }}</span>
+      </div>
     }
-  </label>
 
-  <label>
-    اسم المالك
-    <input type="text" autocomplete="name" [formField]="registerForm.ownerName" />
-    @if (registerForm.ownerName().touched()) {
-      @for (error of registerForm.ownerName().errors(); track error.kind) {
-        <span class="error">{{ error.message }}</span>
+    <div class="row">
+      <div class="col-sm-6">
+        <tamam-field label="اسم النشاط" [field]="registerForm.businessName" [required]="true">
+          <input type="text" class="form-control" autocomplete="organization" [formField]="registerForm.businessName" />
+        </tamam-field>
+      </div>
+      <div class="col-sm-6">
+        <tamam-field label="اسم المالك" [field]="registerForm.ownerName" [required]="true">
+          <input type="text" class="form-control" autocomplete="name" [formField]="registerForm.ownerName" />
+        </tamam-field>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-sm-6">
+        <tamam-field label="الدولة" [field]="registerForm.countryCode" [required]="true">
+          <select class="form-select" [formField]="registerForm.countryCode">
+            <option value="">اختر الدولة</option>
+            @for (country of countries(); track country.code) {
+              <option [value]="country.code">{{ country.nameAr }}</option>
+            }
+          </select>
+        </tamam-field>
+      </div>
+      <div class="col-sm-6">
+        <tamam-field label="رقم الهاتف" [field]="registerForm.phone" [required]="true">
+          <input type="tel" class="form-control" autocomplete="tel" [formField]="registerForm.phone" />
+        </tamam-field>
+      </div>
+    </div>
+
+    <tamam-field label="البريد الإلكتروني" [field]="registerForm.email" [required]="true">
+      <input type="email" class="form-control" autocomplete="email" [formField]="registerForm.email" />
+    </tamam-field>
+
+    <tamam-field label="كلمة المرور" [field]="registerForm.password" hint="8 أحرف على الأقل" [required]="true">
+      <input type="password" class="form-control" autocomplete="new-password" [formField]="registerForm.password" />
+    </tamam-field>
+
+    <button type="submit" class="btn btn-primary btn-lg w-100" [disabled]="registerForm().submitting()">
+      @if (registerForm().submitting()) {
+        <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
       }
-    }
-  </label>
+      إنشاء الحساب
+    </button>
 
-  <label>
-    الدولة
-    <select [formField]="registerForm.countryCode">
-      <option value="">اختر الدولة</option>
-      @for (country of countries(); track country.code) {
-        <option [value]="country.code">{{ country.nameAr }}</option>
-      }
-    </select>
-    @if (registerForm.countryCode().touched()) {
-      @for (error of registerForm.countryCode().errors(); track error.kind) {
-        <span class="error">{{ error.message }}</span>
-      }
-    }
-  </label>
-
-  <label>
-    رقم الهاتف
-    <input type="tel" autocomplete="tel" [formField]="registerForm.phone" />
-    @if (registerForm.phone().touched()) {
-      @for (error of registerForm.phone().errors(); track error.kind) {
-        <span class="error">{{ error.message }}</span>
-      }
-    }
-  </label>
-
-  <label>
-    البريد الإلكتروني
-    <input type="email" autocomplete="email" [formField]="registerForm.email" />
-    @if (registerForm.email().touched()) {
-      @for (error of registerForm.email().errors(); track error.kind) {
-        <span class="error">{{ error.message }}</span>
-      }
-    }
-  </label>
-
-  <label>
-    كلمة المرور
-    <input type="password" autocomplete="new-password" [formField]="registerForm.password" />
-    @if (registerForm.password().touched()) {
-      @for (error of registerForm.password().errors(); track error.kind) {
-        <span class="error">{{ error.message }}</span>
-      }
-    }
-  </label>
-
-  <button type="submit" [disabled]="registerForm().submitting()">إنشاء الحساب</button>
-
-  <p>لديك حساب؟ <a routerLink="/auth/login">سجّل الدخول</a></p>
-</form>
+    <p class="text-center mt-4 mb-0">لديك حساب؟ <a routerLink="/auth/login" class="fw-bold">سجّل الدخول</a></p>
+  </form>
+</tamam-auth-shell>
