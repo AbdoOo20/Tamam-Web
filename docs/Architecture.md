@@ -107,3 +107,11 @@ using the session token. Pushed notifications go to `NotificationsStore.receive(
 The logo is a chat bubble holding the letter ت with a check-shaped tail (`<tamam-logo on="light|dark|brand" />` in `@tamam/shared`).
 The bubble is green on light and navy backgrounds and navy on a green background. Static files: `public/favicon.svg`, `favicon.ico`, `apple-touch-icon.png`, `icon-192.png`, `icon-512.png`, `logo-mark.svg`, `site.webmanifest`.
 `AppTitleStrategy` sets the tab title to `<page title> | تمام`.
+
+## النشر (الفرونت)
+
+- الفرونت موقع ثابت: ناتج `ng build` في `dist/tamam-web/browser`. يتنشر على أي استضافة ملفات ثابتة (Cloudflare Pages أو Netlify أو غيرهم).
+- قيمة `apiUrl` الإنتاجية في `src/environments/environment.ts` (الآن `https://tamamapi.runasp.net/api`). الـ SignalR بيحسب عنوانه منها.
+- ملف `public/_redirects` بيرجّع أي مسار لـ `index.html` (مطلوب لمسارات Angular مثل `/c/:token`).
+- أعداد الباك بعد النشر: ضيف عنوان الفرونت في `Cors:AllowedOrigins`، وخلّي `PublicLinks:BaseUrl` يساويه عشان روابط التأكيد توصل للعميل صح.
+- بناء Cloudflare Pages/Netlify: أمر البناء `npm run build`، مجلد الإخراج `dist/tamam-web/browser`.

@@ -4,7 +4,7 @@ import { AppEnvironment } from '@tamam/core';
 export const environment: AppEnvironment = {
   production: true,
   appName: 'تمام',
-  apiUrl: 'https://api.your-domain.com/api',
+  apiUrl: 'https://tamamapi.runasp.net/api',
   defaultLanguage: 'ar',
   storagePrefix: 'tamam',
   storageSecret: 'CHANGE-ME-production-storage-secret',
