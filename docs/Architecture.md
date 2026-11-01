@@ -110,8 +110,8 @@ The bubble is green on light and navy backgrounds and navy on a green background
 
 ## النشر (الفرونت)
 
-- الفرونت موقع ثابت: ناتج `ng build` في `dist/tamam-web/browser`. يتنشر على أي استضافة ملفات ثابتة (Cloudflare Pages أو Netlify أو غيرهم).
-- قيمة `apiUrl` الإنتاجية في `src/environments/environment.ts` (الآن `https://tamamapi.runasp.net/api`). الـ SignalR بيحسب عنوانه منها.
-- ملف `public/_redirects` بيرجّع أي مسار لـ `index.html` (مطلوب لمسارات Angular مثل `/c/:token`).
-- أعداد الباك بعد النشر: ضيف عنوان الفرونت في `Cors:AllowedOrigins`، وخلّي `PublicLinks:BaseUrl` يساويه عشان روابط التأكيد توصل للعميل صح.
-- بناء Cloudflare Pages/Netlify: أمر البناء `npm run build`، مجلد الإخراج `dist/tamam-web/browser`.
+- الفرونت موقع ثابت: ناتج `ng build` في `dist/tamam-web/browser`.
+- النشر على Cloudflare (Workers مع Static Assets) بملف `wrangler.jsonc` في جذر المشروع: بيحدد مجلد الملفات `dist/tamam-web/browser`، و`not_found_handling: single-page-application` بيرجّع أي مسار Angular (مثل `/c/:token`) لـ `index.html`.
+- في Cloudflare: Build command `npm run build`، وDeploy command `npx wrangler deploy` (الاسم في `wrangler.jsonc` لازم يطابق اسم الـ Worker).
+- قيمة `apiUrl` الإنتاجية في `src/environments/environment.ts`. الـ SignalR بيحسب عنوانه منها.
+- في الباك بعد النشر: ضيف عنوان الفرونت في `Cors:AllowedOrigins`، وخلّي `PublicLinks:BaseUrl` يساويه عشان روابط التأكيد توصل للعميل صح.
