@@ -93,6 +93,10 @@ input[type='number'] {
   font-weight: 600;
 }
 
+textarea.form-control {
+  resize: none;
+}
+
 .form-control:focus,
 .form-select:focus {
   border-color: var(--tm-primary);
