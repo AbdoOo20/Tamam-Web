@@ -25,14 +25,14 @@ let nextId = 0;
       (click)="onBackdropClick($event)"
     >
       <div class="modal-content border-0">
-        <div class="modal-header">
-          <h2 class="modal-title fs-5 fw-bold" [id]="titleId">{{ title() }}</h2>
-          <button type="button" class="btn-close ms-0 me-auto" aria-label="إغلاق" (click)="close()"></button>
+        <div class="tamam-modal__header">
+          <h2 class="tamam-modal__title" [id]="titleId">{{ title() }}</h2>
+          <button type="button" class="btn-close tamam-modal__close" aria-label="إغلاق" (click)="close()"></button>
         </div>
-        <div class="modal-body">
+        <div class="tamam-modal__body">
           <ng-content />
         </div>
-        <div class="modal-footer">
+        <div class="tamam-modal__footer">
           <ng-content select="[modal-footer]" />
         </div>
       </div>
@@ -69,11 +69,41 @@ let nextId = 0;
       max-height: calc(100vh - 2rem);
     }
 
-    .modal-body {
+    .tamam-modal__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 1.25rem 1.5rem 1rem;
+    }
+
+    .tamam-modal__title {
+      margin: 0;
+      font-size: 1.125rem;
+      font-weight: 700;
+    }
+
+    .tamam-modal__close {
+      flex-shrink: 0;
+      margin: 0;
+    }
+
+    .tamam-modal__body {
+      padding: 0 1.5rem 1.25rem;
+      overflow-x: hidden;
       overflow-y: auto;
     }
 
-    .modal-footer:empty {
+    .tamam-modal__footer {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-start;
+      gap: 0.5rem;
+      padding: 1rem 1.5rem 1.25rem;
+      border-top: 1px solid var(--tm-border);
+    }
+
+    .tamam-modal__footer:empty {
       display: none;
     }
   `,

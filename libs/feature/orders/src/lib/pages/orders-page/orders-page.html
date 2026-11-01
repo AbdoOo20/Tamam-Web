@@ -109,7 +109,7 @@
               <td><tamam-order-status [status]="order.statusId" /></td>
               <td><tamam-risk-badge [level]="order.latestRiskLevel" [score]="order.latestRiskScore" /></td>
               <td class="text-nowrap">{{ order.expectedDeliveryDate | tamamDate }}</td>
-              <td class="text-nowrap text-secondary">{{ order.placedAt | tamamDate: 'datetime' }}</td>
+              <td class="text-nowrap text-secondary">{{ order.placedAt | tamamDate }}</td>
             </tr>
           }
         </tbody>
